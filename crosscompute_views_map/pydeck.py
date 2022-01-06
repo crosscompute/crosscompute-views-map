@@ -18,14 +18,15 @@ class MapPyDeckScreenGridView(VariableView):
     ]
 
     def render_output(self, element_id, function_names, request_path):
+        variable_id = self.variable_id
         body_text = (
             f'<div id="{element_id}" '
-            f'class="{self.view_name} {self.variable_id}"></div>')
+            f'class="{self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
         variable_configuration = self.configuration
         js_texts = [
             MAP_PYDECK_SCREENGRID_JS_TEMPLATE.substitute({
-                'data_uri': request_path + '/' + self.variable_path,
+                'data_uri': request_path + '/' + variable_id,
                 'opacity': variable_configuration.get('opacity', 0.5),
                 'element_id': element_id,
                 'mapbox_token': mapbox_token,
@@ -45,12 +46,13 @@ class MapPyDeckScreenGridView(VariableView):
 
 
 MAP_PYDECK_SCREENGRID_JS_TEMPLATE = Template('''\
-const layers = []
-layers.push(new deck.ScreenGridLayer({
-  data: '$data_uri',
-  getPosition: d => d,
-  opacity: $opacity,
-}))
+const layers = [
+  new deck.ScreenGridLayer({
+    data: '$data_uri',
+    getPosition: d => d,
+    opacity: $opacity,
+  }),
+];
 new deck.DeckGL({
   container: '$element_id',
   mapboxApiAccessToken: '$mapbox_token',
@@ -68,5 +70,5 @@ new deck.DeckGL({
     preserveDrawingBuffer: true,
   },
   */
-})
+});
 ''')

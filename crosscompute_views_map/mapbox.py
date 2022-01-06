@@ -16,16 +16,17 @@ class MapMapboxView(VariableView):
     ]
 
     def render_output(self, element_id, function_names, request_path):
+        variable_id = self.variable_id
         body_text = (
             f'<div id="{element_id}" '
-            f'class="{self.view_name} {self.variable_id}"></div>')
+            f'class="{self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
         variable_configuration = self.configuration
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}'",
             MAP_MAPBOX_JS_TEMPLATE.substitute({
                 'element_id': element_id,
-                'data_uri': request_path + '/' + self.variable_path,
+                'data_uri': request_path + '/' + variable_id,
                 'style_uri': variable_configuration.get(
                     'style', MAP_MAPBOX_STYLE_URI),
                 'longitude': variable_configuration.get('longitude', 0),
@@ -49,7 +50,7 @@ const $element_id = new mapboxgl.Map({
   center: [$longitude, $latitude],
   zoom: $zoom,
   // preserveDrawingBuffer: true,
-})
+});
 $element_id.on('load', () => {
   $element_id.addSource('$element_id', {
     type: 'geojson',
@@ -58,5 +59,5 @@ $element_id.on('load', () => {
     id: '$element_id',
     type: 'fill',
     source: '$element_id'})
-})''')
+});''')
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'

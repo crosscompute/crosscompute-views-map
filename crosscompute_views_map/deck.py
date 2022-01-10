@@ -5,9 +5,9 @@ from string import Template
 from .mapbox import MAP_MAPBOX_STYLE_URI
 
 
-class MapPyDeckScreenGridView(VariableView):
+class MapDeckScreenGridView(VariableView):
 
-    view_name = 'map-pydeck-screengrid'
+    view_name = 'map-deck-screengrid'
     is_asynchronous = True
     css_uris = [
         'https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css',

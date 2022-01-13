@@ -70,5 +70,4 @@ new deck.DeckGL({
     preserveDrawingBuffer: true,
   },
   */
-});
-''')
+});''')

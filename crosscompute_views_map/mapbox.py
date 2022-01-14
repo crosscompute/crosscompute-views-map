@@ -1,7 +1,8 @@
 # TODO: Let creator override mapbox css and js
+# TODO: Let creator override js template
 from crosscompute.macros.configuration import get_environment_value
 from crosscompute.routines.variable import VariableView
-from string import Template
+from jinja2 import Template
 
 
 class MapMapboxView(VariableView):
@@ -9,10 +10,10 @@ class MapMapboxView(VariableView):
     view_name = 'map-mapbox'
     is_asynchronous = True
     css_uris = [
-        'https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css',
+        'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css',
     ]
     js_uris = [
-        'https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js',
+        'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js',
     ]
 
     def render_output(self, element_id, function_names, request_path):
@@ -22,6 +23,12 @@ class MapMapboxView(VariableView):
             f'class="{self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
         variable_configuration = self.configuration
+
+        variable_configuration.get('layers', [{
+
+        }])
+
+
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}'",
             MAP_MAPBOX_JS_TEMPLATE.substitute({
@@ -43,21 +50,37 @@ class MapMapboxView(VariableView):
         }
 
 
+MAP_MAPBOX_JS_TEMPLATE = TEMPLATE_ENVIRONMENT.get_template(
+    'mapbox.jinja2')
 MAP_MAPBOX_JS_TEMPLATE = Template('''\
-const $element_id = new mapboxgl.Map({
-  container: '$element_id',
-  style: '$style_uri',
-  center: [$longitude, $latitude],
-  zoom: $zoom,
-  // preserveDrawingBuffer: true,
+const {{ element_id }} = new mapboxgl.Map({{ }});
+{{ element_id }}.on('load', () => {
+{% for source in sources %}
+  {{ element_id }}.addSource({{ source }});
+{% endfor %}
+{% for layer in layers %}
+  {{ element_id }}.addLayer({{ layer }});
+{% endfor %}
 });
-$element_id.on('load', () => {
-  $element_id.addSource('$element_id', {
-    type: 'geojson',
-    data: '$data_uri'})
-  $element_id.addLayer({
-    id: '$element_id',
-    type: 'fill',
-    source: '$element_id'})
-});''')
+''')
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
+
+
+  {{ element_id }}.addLayer({ {{ layer }} });
+    id: '{{ layer.get('id', loop.index0) }}',
+    type: '{{ layer.get('type', 'circle') }}',
+    source: '{{ layer.get('source', element_id) }}',
+    paint: {},
+  });
+
+  {{ element_id }}.addSource('{{ element_id }}', {
+    type: 'geojson',
+    data: '{{ data_uri }}'});
+
+{
+  container: '{{ element_id }}',
+  style: '{{ style_uri }}',
+  center: [{{ longitude }}, {{ latitude }}],
+  zoom: {{ zoom }},
+{# preserveDrawingBuffer: true, #}
+}

@@ -1,3 +1,4 @@
+# TODO: Detect from url parameters whether we are rendering a pdf
 # TODO: Let creator override mapbox css and js
 # TODO: Let creator override js template
 from crosscompute.macros.configuration import get_environment_value
@@ -17,31 +18,23 @@ class MapMapboxView(VariableView):
     ]
 
     def render_output(self, element_id, function_names, request_path):
+        # TODO: Consider is_print or for_print
         variable_id = self.variable_id
+        data_uri = request_path + '/' + variable_id
         body_text = (
             f'<div id="{element_id}" '
             f'class="{self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
-        variable_configuration = self.configuration
-
-        variable_configuration.get('layers', [{
-
-        }])
-
-
+        d = self.configuration
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}'",
-            MAP_MAPBOX_JS_TEMPLATE.substitute({
+            MAP_MAPBOX_JS_TEMPLATE.render({
                 'element_id': element_id,
-                'data_uri': request_path + '/' + variable_id,
-                'style_uri': variable_configuration.get(
-                    'style', MAP_MAPBOX_STYLE_URI),
-                'longitude': variable_configuration.get('longitude', 0),
-                'latitude': variable_configuration.get('latitude', 0),
-                'zoom': variable_configuration.get('zoom', 0),
+                'map': get_map_definition(element_id, d),
+                'sources': get_source_definitions(element_id, d, data_uri),
+                'layers': get_layer_definitions(element_id, d),
             }),
         ]
-        # TODO: Allow specification of preserveDrawingBuffer
         return {
             'css_uris': self.css_uris,
             'js_uris': self.js_uris,
@@ -50,37 +43,49 @@ class MapMapboxView(VariableView):
         }
 
 
-MAP_MAPBOX_JS_TEMPLATE = TEMPLATE_ENVIRONMENT.get_template(
-    'mapbox.jinja2')
+def get_map_definition(element_id, variable_configuration):
+    style_uri = variable_configuration.get('style', MAP_MAPBOX_STYLE_URI)
+    longitude = variable_configuration.get('longitude', 0)
+    latitude = variable_configuration.get('latitude', 0)
+    zoom = variable_configuration.get('zoom', 0)
+    return {
+        'container': element_id,
+        'style': style_uri,
+        'center': [longitude, latitude],
+        'zoom': zoom,
+        # 'preserveDrawingBuffer': True,
+    }
+
+
+def get_source_definitions(element_id, variable_configuration, data_uri):
+    return variable_configuration.get('sources', [{
+        'id': element_id,
+        'type': 'geojson',
+        'data': data_uri,
+    }])
+
+
+def get_layer_definitions(element_id, variable_configuration):
+    definitions = []
+    for index, d in enumerate(variable_configuration.get('layers', [{
+        'type': 'circle',
+    }])):
+        if 'id' not in d:
+            d['id'] = f'l{index}'
+        if 'source' not in d:
+            d['source'] = element_id
+        definitions.append(d)
+    return definitions
+
+
 MAP_MAPBOX_JS_TEMPLATE = Template('''\
-const {{ element_id }} = new mapboxgl.Map({{ }});
+const {{ element_id }} = new mapboxgl.Map({{ map }});
 {{ element_id }}.on('load', () => {
-{% for source in sources %}
-  {{ element_id }}.addSource({{ source }});
-{% endfor %}
-{% for layer in layers %}
+{%- for source in sources %}
+  {{ element_id }}.addSource('{{ source.pop('id') }}', {{ source }});
+{%- endfor %}
+{%- for layer in layers %}
   {{ element_id }}.addLayer({{ layer }});
-{% endfor %}
-});
-''')
+{%- endfor %}
+});''')
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
-
-
-  {{ element_id }}.addLayer({ {{ layer }} });
-    id: '{{ layer.get('id', loop.index0) }}',
-    type: '{{ layer.get('type', 'circle') }}',
-    source: '{{ layer.get('source', element_id) }}',
-    paint: {},
-  });
-
-  {{ element_id }}.addSource('{{ element_id }}', {
-    type: 'geojson',
-    data: '{{ data_uri }}'});
-
-{
-  container: '{{ element_id }}',
-  style: '{{ style_uri }}',
-  center: [{{ longitude }}, {{ latitude }}],
-  zoom: {{ zoom }},
-{# preserveDrawingBuffer: true, #}
-}

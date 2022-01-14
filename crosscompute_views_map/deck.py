@@ -10,11 +10,11 @@ class MapDeckScreenGridView(VariableView):
     view_name = 'map-deck-screengrid'
     is_asynchronous = True
     css_uris = [
-        'https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css',
+        'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css',
     ]
     js_uris = [
         'https://unpkg.com/deck.gl@^8.0.0/dist.min.js',
-        'https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js',
+        'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js',
     ]
 
     def render_output(self, element_id, function_names, request_path):

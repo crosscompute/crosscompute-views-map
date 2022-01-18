@@ -17,22 +17,22 @@ class MapMapboxView(VariableView):
         'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js',
     ]
 
-    def render_output(self, element_id, function_names, request_path):
-        # TODO: Consider is_print or for_print
+    def render_output(
+            self, element_id, function_names, request_path, for_print):
         variable_id = self.variable_id
         data_uri = request_path + '/' + variable_id
         body_text = (
             f'<div id="{element_id}" '
             f'class="{self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
-        d = self.configuration
+        c = self.configuration
         js_texts = [
-            f"mapboxgl.accessToken = '{mapbox_token}'",
+            f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_MAPBOX_JS_TEMPLATE.render({
                 'element_id': element_id,
-                'map': get_map_definition(element_id, d),
-                'sources': get_source_definitions(element_id, d, data_uri),
-                'layers': get_layer_definitions(element_id, d),
+                'map': get_map_definition(element_id, c, for_print),
+                'sources': get_source_definitions(element_id, c, data_uri),
+                'layers': get_layer_definitions(element_id, c),
             }),
         ]
         return {
@@ -43,18 +43,20 @@ class MapMapboxView(VariableView):
         }
 
 
-def get_map_definition(element_id, variable_configuration):
+def get_map_definition(element_id, variable_configuration, for_print):
     style_uri = variable_configuration.get('style', MAP_MAPBOX_STYLE_URI)
     longitude = variable_configuration.get('longitude', 0)
     latitude = variable_configuration.get('latitude', 0)
     zoom = variable_configuration.get('zoom', 0)
-    return {
+    d = {
         'container': element_id,
         'style': style_uri,
         'center': [longitude, latitude],
         'zoom': zoom,
-        # 'preserveDrawingBuffer': True,
     }
+    if for_print:
+        d['preserveDrawingBuffer'] = 1
+    return d
 
 
 def get_source_definitions(element_id, variable_configuration, data_uri):

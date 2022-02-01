@@ -1,5 +1,5 @@
 from crosscompute.macros.configuration import get_environment_value
-from crosscompute.routines.variable import VariableView
+from crosscompute.routines.variable import VariableElement, VariableView
 from jinja2 import Template
 
 from .mapbox import MAP_MAPBOX_STYLE_URI
@@ -17,8 +17,8 @@ class MapDeckScreenGridView(VariableView):
         'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js',
     ]
 
-    def render_output(
-            self, element_id, function_names, request_path, for_print):
+    def render_output(self, x: VariableElement):
+        element_id = x.id
         variable_id = self.variable_id
         body_text = (
             f'<div id="{element_id}" '
@@ -28,14 +28,14 @@ class MapDeckScreenGridView(VariableView):
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_DECK_SCREENGRID_JS_TEMPLATE.render({
-                'data_uri': request_path + '/' + variable_id,
+                'data_uri': x.uri,
                 'opacity': c.get('opacity', 0.5),
                 'element_id': element_id,
                 'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),
-                'for_print': for_print,
+                'for_print': x.for_print,
             }),
         ]
         return {
@@ -47,13 +47,6 @@ class MapDeckScreenGridView(VariableView):
 
 
 MAP_DECK_SCREENGRID_JS_TEMPLATE = Template('''\
-const layers = [
-  new deck.ScreenGridLayer({
-    data: '{{ data_uri }}',
-    getPosition: d => d,
-    opacity: {{ opacity }},
-  }),
-];
 new deck.DeckGL({
   container: '{{ element_id }}',
   mapboxApiAccessToken: mapboxgl.accessToken,
@@ -64,7 +57,13 @@ new deck.DeckGL({
     zoom: {{ zoom }},
   },
   controller: true,
-  layers,
+  layers: [
+    new deck.ScreenGridLayer({
+        data: '{{ data_uri }}',
+        getPosition: d => d,
+        opacity: {{ opacity }},
+    }),
+  ],
 {%- if for_print %}
   preserveDrawingBuffer: 1,
   glOptions: { preserveDrawingBuffer: 1 },

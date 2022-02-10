@@ -9,7 +9,6 @@ from jinja2 import Template
 class MapMapboxView(VariableView):
 
     view_name = 'map-mapbox'
-    is_asynchronous = True
     css_uris = [
         'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css',
     ]

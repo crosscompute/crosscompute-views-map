@@ -1,5 +1,6 @@
 from crosscompute.macros.configuration import get_environment_value
-from crosscompute.routines.variable import VariableElement, VariableView
+from crosscompute.routines.interface import BatchInterface
+from crosscompute.routines.variable import Element, VariableView
 from jinja2 import Template
 
 from .mapbox import MAP_MAPBOX_STYLE_URI
@@ -16,18 +17,20 @@ class MapDeckScreenGridView(VariableView):
         'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js',
     ]
 
-    def render_output(self, x: VariableElement):
+    def render_output(self, b: BatchInterface, x: Element):
+        variable_definition = self.variable_definition
+        data_uri = b.get_data_uri(variable_definition)
+        c = b.get_variable_configuration(variable_definition)
         element_id = x.id
         variable_id = self.variable_id
         body_text = (
             f'<div id="{element_id}" '
-            f'class="{self.view_name} {variable_id}"></div>')
+            f'class="{self.mode_name} {self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
-        c = self.configuration
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_DECK_SCREENGRID_JS_TEMPLATE.render({
-                'data_uri': x.uri,
+                'data_uri': data_uri,
                 'opacity': c.get('opacity', 0.5),
                 'element_id': element_id,
                 'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),

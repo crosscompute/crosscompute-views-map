@@ -2,7 +2,8 @@
 # TODO: Let creator override mapbox css and js
 # TODO: Let creator override js template
 from crosscompute.macros.configuration import get_environment_value
-from crosscompute.routines.variable import VariableElement, VariableView
+from crosscompute.routines.interface import BatchInterface
+from crosscompute.routines.variable import Element, VariableView
 from jinja2 import Template
 
 
@@ -16,20 +17,22 @@ class MapMapboxView(VariableView):
         'https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js',
     ]
 
-    def render_output(self, x: VariableElement):
+    def render_output(self, b: BatchInterface, x: Element):
+        variable_definition = self.variable_definition
+        data_uri = b.get_data_uri(variable_definition)
+        c = b.get_variable_configuration(variable_definition)
         element_id = x.id
         variable_id = self.variable_id
         body_text = (
             f'<div id="{element_id}" '
-            f'class="{self.view_name} {variable_id}"></div>')
+            f'class="{self.mode_name} {self.view_name} {variable_id}"></div>')
         mapbox_token = get_environment_value('MAPBOX_TOKEN', '')
-        c = self.configuration
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_MAPBOX_JS_TEMPLATE.render({
                 'element_id': element_id,
                 'map': get_map_definition(element_id, c, x.for_print),
-                'sources': get_source_definitions(element_id, c, x.uri),
+                'sources': get_source_definitions(element_id, c, data_uri),
                 'layers': get_layer_definitions(element_id, c),
             }),
         ]

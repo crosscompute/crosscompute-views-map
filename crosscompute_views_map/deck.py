@@ -20,7 +20,7 @@ class MapDeckScreenGridView(VariableView):
 
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
-        data_uri = b.get_data_uri(variable_definition)
+        data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         element_id = x.id
         variable_id = self.variable_id

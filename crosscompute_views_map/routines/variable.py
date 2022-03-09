@@ -1,4 +1,3 @@
-# TODO: Detect from url parameters whether we are rendering a pdf
 # TODO: Let creator override mapbox css and js
 # TODO: Let creator override js template
 from crosscompute.routines.interface import Batch
@@ -6,35 +5,80 @@ from crosscompute.routines.variable import Element, VariableView
 from jinja2 import Template
 from os import environ
 
+from ..constants import (
+    DECK_JS_URI,
+    MAPBOX_CSS_URI,
+    MAPBOX_JS_URI,
+    TEMPLATES_FOLDER)
+
 
 class MapMapboxView(VariableView):
 
     view_name = 'map-mapbox'
     environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
-    css_uris = [
-        'https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css',
-    ]
-    js_uris = [
-        'https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js',
-    ]
+    css_uris = [MAPBOX_CSS_URI]
+    js_uris = [MAPBOX_JS_URI]
 
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
+        variable_id = self.variable_id
+        element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
-        element_id = x.id
-        variable_id = self.variable_id
         body_text = (
             f'<div id="{element_id}" '
             f'class="{self.mode_name} {self.view_name} {variable_id}"></div>')
         mapbox_token = environ['MAPBOX_TOKEN']
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_MAPBOX_JS_TEMPLATE.render({
+            MAP_MAPBOX_HEADER,
+            MAP_MAPBOX_OUTPUT.render({
+                'variable_id': variable_id,
                 'element_id': element_id,
+                'data_uri': data_uri,
                 'map': get_map_definition(element_id, c, x.for_print),
                 'sources': get_source_definitions(element_id, c, data_uri),
                 'layers': get_layer_definitions(element_id, c),
+            }),
+        ]
+        return {
+            'css_uris': self.css_uris,
+            'js_uris': self.js_uris,
+            'body_text': body_text,
+            'js_texts': js_texts,
+        }
+
+
+class MapDeckScreenGridView(VariableView):
+
+    view_name = 'map-deck-screengrid'
+    environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
+    css_uris = [MAPBOX_CSS_URI]
+    js_uris = [MAPBOX_JS_URI, DECK_JS_URI]
+
+    def render_output(self, b: Batch, x: Element):
+        variable_definition = self.variable_definition
+        variable_id = self.variable_id
+        element_id = x.id
+        data_uri = b.get_data_uri(variable_definition, x)
+        c = b.get_variable_configuration(variable_definition)
+        body_text = (
+            f'<div id="{element_id}" '
+            f'class="{self.mode_name} {self.view_name} {variable_id}"></div>')
+        mapbox_token = environ['MAPBOX_TOKEN']
+        js_texts = [
+            f"mapboxgl.accessToken = '{mapbox_token}';",
+            MAP_DECK_SCREENGRID_HEADER,
+            MAP_DECK_SCREENGRID_OUTPUT.render({
+                'variable_id': variable_id,
+                'element_id': element_id,
+                'data_uri': data_uri,
+                'opacity': c.get('opacity', 0.5),
+                'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
+                'longitude': c.get('longitude', 0),
+                'latitude': c.get('latitude', 0),
+                'zoom': c.get('zoom', 0),
+                'for_print': x.for_print,
             }),
         ]
         return {
@@ -82,14 +126,18 @@ def get_layer_definitions(element_id, variable_configuration):
     return definitions
 
 
-MAP_MAPBOX_JS_TEMPLATE = Template('''\
-const {{ element_id }} = new mapboxgl.Map({{ map }});
-{{ element_id }}.on('load', () => {
-{%- for source in sources %}
-  {{ element_id }}.addSource('{{ source.pop('id') }}', {{ source }});
-{%- endfor %}
-{%- for layer in layers %}
-  {{ element_id }}.addLayer({{ layer }});
-{%- endfor %}
-});''')
+def load_view_text(file_name):
+    return open(TEMPLATES_FOLDER / file_name).read().strip()
+
+
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
+
+
+MAP_MAPBOX_HEADER = load_view_text('mapboxHeader.js')
+MAP_MAPBOX_OUTPUT = Template(load_view_text('mapboxOutput.js'))
+
+
+MAP_DECK_SCREENGRID_HEADER = load_view_text(
+    'deckScreenGridHeader.js')
+MAP_DECK_SCREENGRID_OUTPUT = Template(load_view_text(
+    'deckScreenGridOutput.js'))

@@ -31,8 +31,8 @@ class MapMapboxView(VariableView):
         mapbox_token = environ['MAPBOX_TOKEN']
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_MAPBOX_HEADER,
-            MAP_MAPBOX_OUTPUT.render({
+            MAP_MAPBOX_JS_HEADER,
+            MAP_MAPBOX_JS_OUTPUT.render({
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,
@@ -68,8 +68,8 @@ class MapDeckScreenGridView(VariableView):
         mapbox_token = environ['MAPBOX_TOKEN']
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_DECK_SCREENGRID_HEADER,
-            MAP_DECK_SCREENGRID_OUTPUT.render({
+            MAP_DECK_SCREENGRID_JS_HEADER,
+            MAP_DECK_SCREENGRID_JS_OUTPUT.render({
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,
@@ -133,11 +133,11 @@ def load_view_text(file_name):
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
 
 
-MAP_MAPBOX_HEADER = load_view_text('mapboxHeader.js')
-MAP_MAPBOX_OUTPUT = Template(load_view_text('mapboxOutput.js'))
+MAP_MAPBOX_JS_HEADER = load_view_text('mapboxHeader.js')
+MAP_MAPBOX_JS_OUTPUT = Template(load_view_text('mapboxOutput.js'))
 
 
-MAP_DECK_SCREENGRID_HEADER = load_view_text(
+MAP_DECK_SCREENGRID_JS_HEADER = load_view_text(
     'deckScreenGridHeader.js')
-MAP_DECK_SCREENGRID_OUTPUT = Template(load_view_text(
+MAP_DECK_SCREENGRID_JS_OUTPUT = Template(load_view_text(
     'deckScreenGridOutput.js'))

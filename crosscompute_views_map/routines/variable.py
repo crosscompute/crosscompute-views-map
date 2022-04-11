@@ -1,9 +1,12 @@
 # TODO: Let creator override mapbox css and js
 # TODO: Let creator override js template
-from crosscompute.routines.interface import Batch
-from crosscompute.routines.variable import Element, VariableView
-from jinja2 import Template
 from os import environ
+from string import Template as StringTemplate
+
+from crosscompute.routines.interface import Batch
+from crosscompute.routines.variable import (
+    Element, VariableView, add_label_html)
+from jinja2 import Template as JinjaTemplate
 
 from ..constants import (
     DECK_JS_URI,
@@ -25,10 +28,15 @@ class MapMapboxView(VariableView):
         element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
-        body_text = (
-            f'<div id="{element_id}" '
-            f'class="{self.mode_name} {self.view_name} {variable_id}"></div>')
         mapbox_token = environ['MAPBOX_TOKEN']
+        main_text = MAP_MAPBOX_HTML_OUTPUT.substitute({
+            'element_id': element_id,
+            'mode_name': self.mode_name,
+            'view_name': self.view_name,
+            'variable_id': variable_id,
+        })
+        if x.design_name not in ['none']:
+            main_text = add_label_html(main_text, c, variable_id, element_id)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_MAPBOX_JS_HEADER,
@@ -44,7 +52,7 @@ class MapMapboxView(VariableView):
         return {
             'css_uris': self.css_uris,
             'js_uris': self.js_uris,
-            'body_text': body_text,
+            'main_text': main_text,
             'js_texts': js_texts,
         }
 
@@ -62,10 +70,15 @@ class MapDeckScreenGridView(VariableView):
         element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
-        body_text = (
-            f'<div id="{element_id}" '
-            f'class="{self.mode_name} {self.view_name} {variable_id}"></div>')
         mapbox_token = environ['MAPBOX_TOKEN']
+        main_text = MAP_MAPBOX_HTML_OUTPUT.substitute({
+            'element_id': element_id,
+            'mode_name': self.mode_name,
+            'view_name': self.view_name,
+            'variable_id': variable_id,
+        })
+        if x.design_name not in ['none']:
+            main_text = add_label_html(main_text, c, variable_id, element_id)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_DECK_SCREENGRID_JS_HEADER,
@@ -84,7 +97,7 @@ class MapDeckScreenGridView(VariableView):
         return {
             'css_uris': self.css_uris,
             'js_uris': self.js_uris,
-            'body_text': body_text,
+            'main_text': main_text,
             'js_texts': js_texts,
         }
 
@@ -131,13 +144,12 @@ def load_view_text(file_name):
 
 
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
-
-
+MAP_MAPBOX_HTML_OUTPUT = StringTemplate(load_view_text('mapboxOutput.html'))
 MAP_MAPBOX_JS_HEADER = load_view_text('mapboxHeader.js')
-MAP_MAPBOX_JS_OUTPUT = Template(load_view_text('mapboxOutput.js'))
+MAP_MAPBOX_JS_OUTPUT = JinjaTemplate(load_view_text('mapboxOutput.js'))
 
 
 MAP_DECK_SCREENGRID_JS_HEADER = load_view_text(
     'deckScreenGridHeader.js')
-MAP_DECK_SCREENGRID_JS_OUTPUT = Template(load_view_text(
+MAP_DECK_SCREENGRID_JS_OUTPUT = JinjaTemplate(load_view_text(
     'deckScreenGridOutput.js'))

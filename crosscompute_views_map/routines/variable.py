@@ -29,7 +29,7 @@ class MapMapboxView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML_OUTPUT.substitute({
+        main_text = MAP_MAPBOX_HTML.substitute({
             'element_id': element_id,
             'mode_name': self.mode_name,
             'view_name': self.view_name,
@@ -39,14 +39,54 @@ class MapMapboxView(VariableView):
             main_text = add_label_html(main_text, c, variable_id, element_id)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_MAPBOX_JS_HEADER,
-            MAP_MAPBOX_JS_OUTPUT.render({
+            MAP_MAPBOX_OUTPUT_JS_HEADER,
+            MAP_MAPBOX_OUTPUT_JS_VARIABLE.render({
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,
                 'map': get_map_definition(element_id, c, x.for_print),
                 'sources': get_source_definitions(element_id, c, data_uri),
                 'layers': get_layer_definitions(element_id, c),
+            }),
+        ]
+        return {
+            'css_uris': self.css_uris,
+            'js_uris': self.js_uris,
+            'main_text': main_text,
+            'js_texts': js_texts,
+        }
+
+
+class MapMapboxLocationView(VariableView):
+
+    view_name = 'map-mapbox-location'
+    environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
+    css_uris = [MAPBOX_CSS_URI]
+    js_uris = [MAPBOX_JS_URI]
+
+    def render_input(self, b: Batch, x: Element):
+        variable_definition = self.variable_definition
+        variable_id = self.variable_id
+        element_id = x.id
+        view_name = self.view_name
+        c = b.get_variable_configuration(variable_definition)
+        mapbox_token = environ['MAPBOX_TOKEN']
+        main_text = MAP_MAPBOX_HTML.substitute({
+            'element_id': element_id,
+            'mode_name': self.mode_name,
+            'view_name': view_name,
+            'variable_id': variable_id,
+        })
+        if x.design_name not in ['none']:
+            main_text = add_label_html(main_text, c, variable_id, element_id)
+        js_texts = [
+            f"mapboxgl.accessToken = '{mapbox_token}';",
+            MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.substitute({
+                'view_name': view_name,
+            }),
+            MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
+                'element_id': element_id,
+                'map': get_map_definition(element_id, c, x.for_print),
             }),
         ]
         return {
@@ -71,7 +111,7 @@ class MapDeckScreenGridView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML_OUTPUT.substitute({
+        main_text = MAP_MAPBOX_HTML.substitute({
             'element_id': element_id,
             'mode_name': self.mode_name,
             'view_name': self.view_name,
@@ -81,8 +121,8 @@ class MapDeckScreenGridView(VariableView):
             main_text = add_label_html(main_text, c, variable_id, element_id)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_DECK_SCREENGRID_JS_HEADER,
-            MAP_DECK_SCREENGRID_JS_OUTPUT.render({
+            MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER,
+            MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE.render({
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,
@@ -144,12 +184,22 @@ def load_view_text(file_name):
 
 
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
-MAP_MAPBOX_HTML_OUTPUT = StringTemplate(load_view_text('mapboxOutput.html'))
-MAP_MAPBOX_JS_HEADER = load_view_text('mapboxHeader.js')
-MAP_MAPBOX_JS_OUTPUT = JinjaTemplate(load_view_text('mapboxOutput.js'))
+MAP_MAPBOX_HTML = StringTemplate(load_view_text('mapbox.html'))
 
 
-MAP_DECK_SCREENGRID_JS_HEADER = load_view_text(
-    'deckScreenGridHeader.js')
-MAP_DECK_SCREENGRID_JS_OUTPUT = JinjaTemplate(load_view_text(
-    'deckScreenGridOutput.js'))
+MAP_MAPBOX_OUTPUT_JS_HEADER = load_view_text(
+    'mapboxOutputHeader.js')
+MAP_MAPBOX_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
+    'mapboxOutputVariable.js'))
+
+
+MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = StringTemplate(load_view_text(
+    'mapboxLocationInputHeader.js'))
+MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
+    'mapboxLocationInputVariable.js'))
+
+
+MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER = load_view_text(
+    'deckScreenGridOutputHeader.js')
+MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
+    'deckScreenGridOutputVariable.js'))

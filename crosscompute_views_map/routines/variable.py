@@ -70,6 +70,11 @@ class MapMapboxLocationView(VariableView):
         element_id = x.id
         view_name = self.view_name
         c = b.get_variable_configuration(variable_definition)
+        data = b.get_data(variable_definition)
+        if 'value' in data:
+            v = data['value']
+            c['longitude'], c['latitude'] = v['center']
+            c['zoom'] = v['zoom']
         mapbox_token = environ['MAPBOX_TOKEN']
         main_text = MAP_MAPBOX_HTML.substitute({
             'element_id': element_id,
@@ -81,13 +86,12 @@ class MapMapboxLocationView(VariableView):
             main_text = add_label_html(main_text, c, variable_id, element_id)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
+            MAP_MAPBOX_JS_HEADER,
             MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.substitute({
-                'view_name': view_name,
-            }),
+                'view_name': view_name}),
             MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
                 'element_id': element_id,
-                'map': get_map_definition(element_id, c, x.for_print),
-            }),
+                'map': get_map_definition(element_id, c, x.for_print)}),
         ]
         return {
             'css_uris': self.css_uris,
@@ -185,6 +189,8 @@ def load_view_text(file_name):
 
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
 MAP_MAPBOX_HTML = StringTemplate(load_view_text('mapbox.html'))
+MAP_MAPBOX_JS_HEADER = load_view_text(
+    'mapboxHeader.js')
 
 
 MAP_MAPBOX_OUTPUT_JS_HEADER = load_view_text(

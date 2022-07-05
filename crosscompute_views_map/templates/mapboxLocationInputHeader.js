@@ -10,7 +10,7 @@ GET_DATA_BY_VIEW_NAME['$view_name'] = x => {
   const zoom = map.getZoom();
   return {
     value: {
-      bounds: [_ne.lng, _ne.lat, _sw.lng, _sw.lat],
+      bounds: [_sw.lng, _sw.lat, _ne.lng, _ne.lat],
       center: [lng, lat],
       zoom,
     }

@@ -5,7 +5,4 @@ const {{ element_id }}_marker = centerMarker(new mapboxgl.Marker(), {{ element_i
 {{ element_id }}.on('move', () => {
   centerMarker({{ element_id }}_marker, {{ element_id }});
 });
-mapboxGeolocateControl.on('geolocate', () => {
-  centerMarker({{ element_id }}_marker, {{ element_id }});
-});
 MAP_BY_ELEMENT_ID['{{ element_id }}'] = {{ element_id }};

@@ -29,14 +29,9 @@ class MapMapboxView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML.substitute({
-            'element_id': element_id,
-            'mode_name': self.mode_name,
-            'view_name': self.view_name,
-            'variable_id': variable_id,
-        })
-        if x.design_name not in ['none']:
-            main_text = add_label_html(main_text, c, variable_id, element_id)
+        main_text = get_map_html(
+            element_id, variable_id, c, self.mode_name, self.view_name,
+            x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_MAPBOX_OUTPUT_JS_HEADER,
@@ -76,14 +71,9 @@ class MapMapboxLocationView(VariableView):
             c['longitude'], c['latitude'] = v['center']
             c['zoom'] = v['zoom']
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML.substitute({
-            'element_id': element_id,
-            'mode_name': self.mode_name,
-            'view_name': view_name,
-            'variable_id': variable_id,
-        })
-        if x.design_name not in ['none']:
-            main_text = add_label_html(main_text, c, variable_id, element_id)
+        main_text = get_map_html(
+            element_id, variable_id, c, self.mode_name, view_name,
+            x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_MAPBOX_JS_HEADER,
@@ -115,14 +105,9 @@ class MapDeckScreenGridView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML.substitute({
-            'element_id': element_id,
-            'mode_name': self.mode_name,
-            'view_name': self.view_name,
-            'variable_id': variable_id,
-        })
-        if x.design_name not in ['none']:
-            main_text = add_label_html(main_text, c, variable_id, element_id)
+        main_text = get_map_html(
+            element_id, variable_id, c, self.mode_name, self.view_name,
+            x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER,
@@ -132,6 +117,7 @@ class MapDeckScreenGridView(VariableView):
                 'data_uri': data_uri,
                 'opacity': c.get('opacity', 0.5),
                 'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
+                'bounds': c.get('bounds', 'null'),
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),
@@ -144,6 +130,21 @@ class MapDeckScreenGridView(VariableView):
             'main_text': main_text,
             'js_texts': js_texts,
         }
+
+
+def get_map_html(
+        element_id, variable_id, variable_configuration, mode_name, view_name,
+        design_name):
+    main_text = MAP_MAPBOX_HTML.substitute({
+        'element_id': element_id,
+        'mode_name': mode_name,
+        'view_name': view_name,
+        'variable_id': variable_id,
+    })
+    if design_name not in ['none']:
+        main_text = add_label_html(
+            main_text, variable_configuration, variable_id, element_id)
+    return main_text
 
 
 def get_map_definition(element_id, variable_configuration, for_print):
@@ -208,4 +209,4 @@ MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
 MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER = load_view_text(
     'deckScreenGridOutputHeader.js')
 MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'deckScreenGridOutputVariable.js'))
+    'deckScreenGridOutputVariable.js'), trim_blocks=True)

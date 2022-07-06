@@ -35,7 +35,7 @@ setTimeout(function {{ element_id }}UpdateViewState() {
   {{ element_id }}.setProps({
     initialViewState: { longitude: center.lng, latitude: center.lat, zoom: Math.trunc(zoom) },
   });
-}, 100);
+}, 0);
 {% endif %}
 registerElement('{{ variable_id }}', function () {
   refreshMapDeckScreenGrid('{{ element_id }}', '{{ data_uri }}', {{ element_id }}, {{ element_id }}LayerOptions);

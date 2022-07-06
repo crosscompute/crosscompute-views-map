@@ -1,8 +1,11 @@
 # TODO: Let creator override mapbox css and js
 # TODO: Let creator override js template
+import json
 from os import environ
 from string import Template as StringTemplate
 
+import geojson
+import numpy as np
 from crosscompute.routines.interface import Batch
 from crosscompute.routines.variable import (
     Element, VariableView, add_label_html)
@@ -12,7 +15,8 @@ from ..constants import (
     DECK_JS_URI,
     MAPBOX_CSS_URI,
     MAPBOX_JS_URI,
-    TEMPLATES_FOLDER)
+    TEMPLATES_FOLDER,
+    TURF_JS_URI)
 
 
 class MapMapboxView(VariableView):
@@ -20,7 +24,12 @@ class MapMapboxView(VariableView):
     view_name = 'map-mapbox'
     environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
     css_uris = [MAPBOX_CSS_URI]
-    js_uris = [MAPBOX_JS_URI]
+    js_uris = [MAPBOX_JS_URI, TURF_JS_URI]
+
+    def process(self, path):
+        with path.open('rt') as f:
+            array = np.array(list(geojson.utils.coords(json.load(f))))
+        save_map_configuration(array, path)
 
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
@@ -29,14 +38,9 @@ class MapMapboxView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML.substitute({
-            'element_id': element_id,
-            'mode_name': self.mode_name,
-            'view_name': self.view_name,
-            'variable_id': variable_id,
-        })
-        if x.design_name not in ['none']:
-            main_text = add_label_html(main_text, c, variable_id, element_id)
+        main_text = get_map_html(
+            element_id, variable_id, c, self.mode_name, self.view_name,
+            x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_MAPBOX_OUTPUT_JS_HEADER,
@@ -44,6 +48,7 @@ class MapMapboxView(VariableView):
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,
+                'bounds': c.get('bounds'),
                 'map': get_map_definition(element_id, c, x.for_print),
                 'sources': get_source_definitions(element_id, c, data_uri),
                 'layers': get_layer_definitions(element_id, c),
@@ -76,17 +81,11 @@ class MapMapboxLocationView(VariableView):
             c['longitude'], c['latitude'] = v['center']
             c['zoom'] = v['zoom']
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML.substitute({
-            'element_id': element_id,
-            'mode_name': self.mode_name,
-            'view_name': view_name,
-            'variable_id': variable_id,
-        })
-        if x.design_name not in ['none']:
-            main_text = add_label_html(main_text, c, variable_id, element_id)
+        main_text = get_map_html(
+            element_id, variable_id, c, self.mode_name, view_name,
+            x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_MAPBOX_JS_HEADER,
             MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.substitute({
                 'view_name': view_name}),
             MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
@@ -108,6 +107,11 @@ class MapDeckScreenGridView(VariableView):
     css_uris = [MAPBOX_CSS_URI]
     js_uris = [MAPBOX_JS_URI, DECK_JS_URI]
 
+    def process(self, path):
+        with path.open('rt') as f:
+            array = np.array(json.load(f))
+        save_map_configuration(array, path)
+
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
         variable_id = self.variable_id
@@ -115,14 +119,9 @@ class MapDeckScreenGridView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
-        main_text = MAP_MAPBOX_HTML.substitute({
-            'element_id': element_id,
-            'mode_name': self.mode_name,
-            'view_name': self.view_name,
-            'variable_id': variable_id,
-        })
-        if x.design_name not in ['none']:
-            main_text = add_label_html(main_text, c, variable_id, element_id)
+        main_text = get_map_html(
+            element_id, variable_id, c, self.mode_name, self.view_name,
+            x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER,
@@ -132,6 +131,7 @@ class MapDeckScreenGridView(VariableView):
                 'data_uri': data_uri,
                 'opacity': c.get('opacity', 0.5),
                 'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
+                'bounds': c.get('bounds'),
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),
@@ -144,6 +144,35 @@ class MapDeckScreenGridView(VariableView):
             'main_text': main_text,
             'js_texts': js_texts,
         }
+
+
+def save_map_configuration(xy_array, source_path):
+    xs = xy_array[:, 0]
+    ys = xy_array[:, 1]
+    longitude = xs.mean()
+    latitude = ys.mean()
+    bounds = xs.min(), ys.min(), xs.max(), ys.max()
+    with open(str(source_path) + '.configuration', 'wt') as f:
+        json.dump({
+            'longitude': longitude,
+            'latitude': latitude,
+            'bounds': bounds,
+        }, f)
+
+
+def get_map_html(
+        element_id, variable_id, variable_configuration, mode_name, view_name,
+        design_name):
+    main_text = MAP_MAPBOX_HTML.substitute({
+        'element_id': element_id,
+        'mode_name': mode_name,
+        'view_name': view_name,
+        'variable_id': variable_id,
+    })
+    if design_name not in ['none']:
+        main_text = add_label_html(
+            main_text, variable_configuration, variable_id, element_id)
+    return main_text
 
 
 def get_map_definition(element_id, variable_configuration, for_print):
@@ -176,7 +205,7 @@ def get_layer_definitions(element_id, variable_configuration):
         'type': 'circle',
     }])):
         if 'id' not in d:
-            d['id'] = f'l{index}'
+            d['id'] = element_id
         if 'source' not in d:
             d['source'] = element_id
         definitions.append(d)
@@ -189,23 +218,21 @@ def load_view_text(file_name):
 
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
 MAP_MAPBOX_HTML = StringTemplate(load_view_text('mapbox.html'))
-MAP_MAPBOX_JS_HEADER = load_view_text(
-    'mapboxHeader.js')
 
 
 MAP_MAPBOX_OUTPUT_JS_HEADER = load_view_text(
     'mapboxOutputHeader.js')
 MAP_MAPBOX_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'mapboxOutputVariable.js'))
+    'mapboxOutputVariable.js'), trim_blocks=True)
 
 
 MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = StringTemplate(load_view_text(
     'mapboxLocationInputHeader.js'))
 MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'mapboxLocationInputVariable.js'))
+    'mapboxLocationInputVariable.js'), trim_blocks=True)
 
 
 MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER = load_view_text(
     'deckScreenGridOutputHeader.js')
 MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'deckScreenGridOutputVariable.js'))
+    'deckScreenGridOutputVariable.js'), trim_blocks=True)

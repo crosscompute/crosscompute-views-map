@@ -1,8 +1,9 @@
-const {{ element_id }}_ = {
+const {{ element_id }}LayerOptions = {
   data: '{{ data_uri }}',
   opacity: {{ opacity }},
   getPosition: d => d,
 };
+const {{ element_id }}Layer = new deck.ScreenGridLayer({{ element_id }}LayerOptions);
 const {{ element_id }} = new deck.DeckGL({
   container: '{{ element_id }}',
   mapboxApiAccessToken: mapboxgl.accessToken,
@@ -13,15 +14,29 @@ const {{ element_id }} = new deck.DeckGL({
     zoom: {{ zoom }},
   },
   controller: true,
-  layers: [
-    new deck.ScreenGridLayer({{ element_id }}_),
-  ],
-{%- if for_print %}
+  layers: [ {{ element_id }}Layer ],
+{% if for_print %}
   preserveDrawingBuffer: 1,
   glOptions: { preserveDrawingBuffer: 1 },
-{%- endif %}
+{% endif %}
 });
+{% if bounds or not zoom %}
+setTimeout(function {{ element_id }}UpdateViewState() {
+{% if bounds %}
+  const bounds = {{ bounds }};
+{% else %}
+  const bounds = {{ element_id }}Layer.getBounds();
+{% endif %}
+  if (!bounds) {
+    setTimeout({{ element_id }}UpdateViewState, 100);
+    return;
+  }
+  const { center, zoom } = {{ element_id }}.getMapboxMap().cameraForBounds(bounds);
+  {{ element_id }}.setProps({
+    initialViewState: { longitude: center.lng, latitude: center.lat, zoom: Math.trunc(zoom) },
+  });
+}, 0);
+{% endif %}
 registerElement('{{ variable_id }}', function () {
-  refreshMapDeckScreenGrid(
-    '{{ element_id }}', '{{ data_uri }}', {{ element_id }}, {{ element_id }}_);
+  refreshMapDeckScreenGrid('{{ element_id }}', '{{ data_uri }}', {{ element_id }}, {{ element_id }}LayerOptions);
 });

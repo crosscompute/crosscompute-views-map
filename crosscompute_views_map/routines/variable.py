@@ -117,7 +117,7 @@ class MapDeckScreenGridView(VariableView):
                 'data_uri': data_uri,
                 'opacity': c.get('opacity', 0.5),
                 'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
-                'bounds': c.get('bounds', 'null'),
+                'bounds': c.get('bounds'),
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),

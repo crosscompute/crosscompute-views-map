@@ -21,15 +21,16 @@ const {{ element_id }} = new deck.DeckGL({
 {% endif %}
 });
 {% if bounds or not zoom %}
-const {{ element_id }}UpdateViewStateIntervalId = setInterval(function() {
-  console.log('hey');
+setTimeout(function {{ element_id }}UpdateViewState() {
 {% if bounds %}
   const bounds = {{ bounds }};
 {% else %}
   const bounds = {{ element_id }}Layer.getBounds();
 {% endif %}
-  if (!bounds) return;
-  clearInterval({{ element_id }}UpdateViewStateIntervalId);
+  if (!bounds) {
+    setTimeout({{ element_id }}UpdateViewState, 100);
+    return;
+  }
   const { center, zoom } = {{ element_id }}.getMapboxMap().cameraForBounds(bounds);
   {{ element_id }}.setProps({
     initialViewState: { longitude: center.lng, latitude: center.lat, zoom: Math.trunc(zoom) },

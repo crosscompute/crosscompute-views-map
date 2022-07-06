@@ -3,6 +3,7 @@
 Render maps in your CrossCompute automations. Here are the views included in this package:
 
 - map-mapbox
+- map-mapbox-location
 - map-deck-screengrid
 
 Please see https://github.com/crosscompute/crosscompute for more information about the CrossCompute Analytics Automation Framework.
@@ -15,11 +16,16 @@ pip install crosscompute-views-map
 
 # Update configuration
 vim automate.yml
-  variables:
-    - id: buildings
-      view: map-mapbox
-    - id: incidents
-      view: map-deck-screengrid
+  input:
+    variables:
+      - id: incident
+        view: map-mapbox-location
+  output:
+    variables:
+      - id: buildings
+        view: map-mapbox
+      - id: incidents
+        view: map-deck-screengrid
 ```
 
 ## Troubleshooting

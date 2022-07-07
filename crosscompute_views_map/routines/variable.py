@@ -43,6 +43,7 @@ class MapMapboxView(VariableView):
             x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
+            MAP_MAPBOX_JS_HEADER,
             MAP_MAPBOX_OUTPUT_JS_HEADER,
             MAP_MAPBOX_OUTPUT_JS_VARIABLE.render({
                 'variable_id': variable_id,
@@ -86,6 +87,7 @@ class MapMapboxLocationView(VariableView):
             x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
+            MAP_MAPBOX_JS_HEADER,
             MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.substitute({
                 'view_name': view_name}),
             MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
@@ -218,6 +220,8 @@ def load_view_text(file_name):
 
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
 MAP_MAPBOX_HTML = StringTemplate(load_view_text('mapbox.html'))
+MAP_MAPBOX_JS_HEADER = load_view_text(
+    'mapboxHeader.js')
 
 
 MAP_MAPBOX_OUTPUT_JS_HEADER = load_view_text(

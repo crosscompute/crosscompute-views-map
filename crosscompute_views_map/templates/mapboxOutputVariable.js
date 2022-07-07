@@ -1,11 +1,4 @@
-const {{ element_id }} = new mapboxgl.Map({{ map }})
-  .addControl(new mapboxgl.GeolocateControl({
-    positionOptions: { enableHighAccuracy: true },
-    showAccuracyCircle: true,
-    showUserHeading: true,
-    trackUserLocation: true
-  }))
-  .addControl(new mapboxgl.FullscreenControl());
+const {{ element_id }} = addMapboxControls(new mapboxgl.Map({{ map }}));
 {{ element_id }}.on('load', () => {
 const m = {{ element_id }};
 {% for source in sources %}

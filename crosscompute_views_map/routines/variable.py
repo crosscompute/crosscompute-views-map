@@ -79,8 +79,14 @@ class MapMapboxLocationView(VariableView):
         data = b.get_data(variable_definition)
         if 'value' in data:
             v = data['value']
-            c['longitude'], c['latitude'] = v['center']
-            c['zoom'] = v['zoom']
+            try:
+                longitude, latitude = v['center']
+                zoom = v['zoom']
+            except (KeyError, TypeError):
+                longitude, latitude, zoom = 0, 0, 0
+            c['longitude'] = longitude
+            c['latitude'] = latitude
+            c['zoom'] = zoom
         mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
             element_id, variable_id, c, self.mode_name, view_name,
@@ -132,6 +138,8 @@ class MapDeckScreenGridView(VariableView):
                 'element_id': element_id,
                 'data_uri': data_uri,
                 'opacity': c.get('opacity', 0.5),
+                'get_position_definition_string': c.get('position', 'd => d'),
+                'get_weight_definition_string': c.get('weight', 1),
                 'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
                 'bounds': c.get('bounds'),
                 'longitude': c.get('longitude', 0),
@@ -149,17 +157,23 @@ class MapDeckScreenGridView(VariableView):
 
 
 def save_map_configuration(xy_array, source_path):
-    xs = xy_array[:, 0]
-    ys = xy_array[:, 1]
-    longitude = xs.mean()
-    latitude = ys.mean()
-    bounds = xs.min(), ys.min(), xs.max(), ys.max()
+    try:
+        xs = xy_array[:, 0]
+        ys = xy_array[:, 1]
+    except IndexError:
+        d = {
+            'longitude': 0,
+            'latitude': 0,
+            'zoom': 0,
+        }
+    else:
+        d = {
+            'longitude': xs.mean(),
+            'latitude': ys.mean(),
+            'bounds': [xs.min(), ys.min(), xs.max(), ys.max()],
+        }
     with open(str(source_path) + '.configuration', 'wt') as f:
-        json.dump({
-            'longitude': longitude,
-            'latitude': latitude,
-            'bounds': bounds,
-        }, f)
+        json.dump(d, f)
 
 
 def get_map_html(

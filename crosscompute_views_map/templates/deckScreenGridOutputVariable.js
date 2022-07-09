@@ -1,7 +1,8 @@
 const {{ element_id }}LayerOptions = {
   data: '{{ data_uri }}',
   opacity: {{ opacity }},
-  getPosition: d => d,
+  getPosition: {{ get_position_definition_string }},
+  getWeight: {{ get_weight_definition_string }},
 };
 const {{ element_id }}Layer = new deck.ScreenGridLayer({{ element_id }}LayerOptions);
 const {{ element_id }} = new deck.DeckGL({

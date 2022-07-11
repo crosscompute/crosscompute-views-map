@@ -1,16 +1,24 @@
 function addMapboxControls(map) {
+  const geolocateControl = new mapboxgl.GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    showAccuracyCircle: true,
+    showUserHeading: true,
+    trackUserLocation: true,
+  });
+  const fullscreenControl = new mapboxgl.FullscreenControl();
+  const navigationControl = new mapboxgl.NavigationControl({
+    visualizePitch: true,
+  });
+  const scaleControl = new mapboxgl.ScaleControl();
+  map.controlByName = {
+    'geolocate': geolocateControl,
+    'fullscreen': fullscreenControl,
+    'navigation': navigationControl,
+    'scale': scaleControl,
+  };
   return map
-    .addControl(new mapboxgl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      showAccuracyCircle: true,
-      showUserHeading: true,
-      trackUserLocation: true
-    }))
-    .addControl(new mapboxgl.FullscreenControl({
-    }), 'bottom-right')
-    .addControl(new mapboxgl.NavigationControl({
-      visualizePitch: true,
-    }), 'top-left')
-    .addControl(new mapboxgl.ScaleControl({
-    }), 'bottom-left');
+    .addControl(geolocateControl)
+    .addControl(fullscreenControl, 'bottom-right')
+    .addControl(navigationControl, 'top-left')
+    .addControl(scaleControl, 'bottom-left');
 }

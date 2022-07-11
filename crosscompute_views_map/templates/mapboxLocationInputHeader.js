@@ -3,7 +3,7 @@ function centerMarker(marker, map) {
   return marker;
 }
 const MAP_BY_ELEMENT_ID = {};
-GET_DATA_BY_VIEW_NAME['$view_name'] = x => {
+GET_DATA_BY_VIEW_NAME['{{ view_name }}'] = x => {
   const map = MAP_BY_ELEMENT_ID[x.id]
   const { _ne, _sw } = map.getBounds();
   const { lng, lat } = map.getCenter();
@@ -16,3 +16,9 @@ GET_DATA_BY_VIEW_NAME['$view_name'] = x => {
     }
   };
 };
+for (var e of document.getElementsByClassName('_{{ view_name }}_geolocate')) {
+    e.onclick = function() {
+      const { element: elementId } = e.dataset;
+      MAP_BY_ELEMENT_ID[elementId].controlByName.geolocate.trigger();
+    }
+}

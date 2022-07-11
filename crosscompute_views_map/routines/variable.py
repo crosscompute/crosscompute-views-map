@@ -37,12 +37,11 @@ class MapMapboxView(VariableView):
         element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
-        mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
             element_id, variable_id, c, self.mode_name, self.view_name,
             x.design_name)
         js_texts = [
-            f"mapboxgl.accessToken = '{mapbox_token}';",
+            "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
             MAP_MAPBOX_JS_HEADER,
             MAP_MAPBOX_OUTPUT_JS_HEADER,
             MAP_MAPBOX_OUTPUT_JS_VARIABLE.render({
@@ -84,17 +83,16 @@ class MapMapboxLocationView(VariableView):
                 zoom = v['zoom']
             except (KeyError, TypeError):
                 longitude, latitude, zoom = 0, 0, 0
-            c['longitude'] = longitude
-            c['latitude'] = latitude
+            c['longitude'], c['latitude'] = longitude, latitude
             c['zoom'] = zoom
-        mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
             element_id, variable_id, c, self.mode_name, view_name,
-            x.design_name)
+            x.design_name, MAP_MAPBOX_LOCATION_INPUT_HTML.render({
+                'view_name': view_name, 'element_id': element_id}))
         js_texts = [
-            f"mapboxgl.accessToken = '{mapbox_token}';",
+            "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
             MAP_MAPBOX_JS_HEADER,
-            MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.substitute({
+            MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.render({
                 'view_name': view_name}),
             MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
                 'element_id': element_id,
@@ -178,8 +176,8 @@ def save_map_configuration(xy_array, source_path):
 
 def get_map_html(
         element_id, variable_id, variable_configuration, mode_name, view_name,
-        design_name):
-    main_text = MAP_MAPBOX_HTML.substitute({
+        design_name, prefix_html=''):
+    main_text = prefix_html + MAP_MAPBOX_HTML.substitute({
         'element_id': element_id,
         'mode_name': mode_name,
         'view_name': view_name,
@@ -244,8 +242,10 @@ MAP_MAPBOX_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
     'mapboxOutputVariable.js'), trim_blocks=True)
 
 
-MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = StringTemplate(load_view_text(
-    'mapboxLocationInputHeader.js'))
+MAP_MAPBOX_LOCATION_INPUT_HTML = JinjaTemplate(load_view_text(
+    'mapboxLocationInput.html'), trim_blocks=True)
+MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = JinjaTemplate(load_view_text(
+    'mapboxLocationInputHeader.js'), trim_blocks=True)
 MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
     'mapboxLocationInputVariable.js'), trim_blocks=True)
 

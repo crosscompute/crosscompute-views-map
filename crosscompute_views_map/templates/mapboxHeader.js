@@ -11,10 +11,10 @@ function addMapboxControls(map) {
   });
   const scaleControl = new mapboxgl.ScaleControl();
   map.controlByName = {
-    'geolocate': geolocateControl,
-    'fullscreen': fullscreenControl,
-    'navigation': navigationControl,
-    'scale': scaleControl,
+    geolocate: geolocateControl,
+    fullscreen: fullscreenControl,
+    navigation: navigationControl,
+    scale: scaleControl,
   };
   return map
     .addControl(geolocateControl)

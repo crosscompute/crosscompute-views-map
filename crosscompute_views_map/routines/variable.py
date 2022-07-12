@@ -168,8 +168,11 @@ def save_map_configuration(xy_array, source_path):
         d = {
             'longitude': xs.mean(),
             'latitude': ys.mean(),
-            'bounds': [xs.min(), ys.min(), xs.max(), ys.max()],
         }
+        if len(xs) == 1:
+            d['zoom'] = 15
+        else:
+            d['bounds'] = xs.min(), ys.min(), xs.max(), ys.max()
     with open(str(source_path) + '.configuration', 'wt') as f:
         json.dump(d, f)
 

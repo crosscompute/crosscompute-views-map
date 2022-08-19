@@ -1,4 +1,4 @@
-const {{ element_id }} = addMapboxControls(new mapboxgl.Map({{ map }}));
+const {{ element_id }} = setupMapMapbox(new mapboxgl.Map({{ map }}), '{{ element_id }}');
 {{ element_id }}.on('load', () => {
 const m = {{ element_id }};
 {% for source in sources %}

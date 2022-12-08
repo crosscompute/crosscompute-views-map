@@ -1,6 +1,6 @@
 const {{ element_id }} = setupMapMapbox(new mapboxgl.Map({{ map }}), '{{ element_id }}');
 {{ element_id }}.on('load', () => {
-const m = {{ element_id }};
+  const m = {{ element_id }};
 {% for source in sources %}
   m.addSource('{{ source.pop('id') }}', {{ source }});
 {% endfor %}

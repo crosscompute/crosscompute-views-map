@@ -1,17 +1,19 @@
 const {{ element_id }} = setupMapMapbox(new mapboxgl.Map({{ map }}), '{{ element_id }}');
 {{ element_id }}.on('load', () => {
-  const m = {{ element_id }};
 {% for source in sources %}
-  m.addSource('{{ source.pop('id') }}', {{ source }});
+  {{ element_id }}.addSource('{{ source.pop('id') }}', {{ source }});
 {% endfor %}
 {% for layer in layers %}
-  m.addLayer({{ layer }});
+  {{ element_id }}.addLayer({{ layer }});
 {% endfor %}
 {% if bounds %}
-  jumpToBounds(m, {{ bounds }});
+  jumpToBounds({{ element_id }}, {{ bounds }});
 {% endif %}
 });
 registerElement('{{ variable_id }}', async function () {
+  while (!{{ element_id }}.loaded) {
+    await sleep(1000);
+  }
   try {
     await refreshMapMapbox('{{ element_id }}', '{{ data_uri }}', {{ element_id }});
   } catch {

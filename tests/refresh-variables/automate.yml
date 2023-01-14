@@ -1,0 +1,29 @@
+---
+crosscompute: 0.9.3
+name: Refresh Variables Test
+version: 0.0.1
+input:
+  variables:
+    - id: delay_in_seconds
+      view: number
+      path: variables.dictionary
+output:
+  variables:
+    - id: features
+      view: map-mapbox
+      path: features.geojson
+      configuration:
+        style: mapbox://styles/mapbox/dark-v10
+        layers:
+          - type: circle
+            paint:
+              circle-color: yellow
+batches:
+  - folder: batches/standard
+scripts:
+  - path: run.py
+environment:
+  interval: 10 seconds
+display:
+  styles:
+    - path: style.css

@@ -17,3 +17,6 @@ dist/
 *.tmp
 *_data
 .DS_Store
+# crosscompute
+debug/
+output/

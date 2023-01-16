@@ -38,7 +38,7 @@ class MapMapboxView(VariableView):
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_variable_configuration(variable_definition)
         main_text = get_map_html(
-            element_id, variable_id, c, self.mode_name, self.view_name,
+            element_id, variable_id, c, x.mode_name, self.view_name,
             x.design_name)
         js_texts = [
             "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
@@ -86,7 +86,7 @@ class MapMapboxLocationView(VariableView):
             c['longitude'], c['latitude'] = longitude, latitude
             c['zoom'] = zoom
         main_text = get_map_html(
-            element_id, variable_id, c, self.mode_name, view_name,
+            element_id, variable_id, c, x.mode_name, view_name,
             x.design_name, MAP_MAPBOX_LOCATION_INPUT_HTML.render({
                 'view_name': view_name, 'element_id': element_id}))
         js_texts = [
@@ -126,7 +126,7 @@ class MapDeckScreenGridView(VariableView):
         c = b.get_variable_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
-            element_id, variable_id, c, self.mode_name, self.view_name,
+            element_id, variable_id, c, x.mode_name, self.view_name,
             x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",

@@ -51,15 +51,10 @@ class MapMapboxView(VariableView):
                 'bounds': c.get('bounds'),
                 'map': get_map_definition(element_id, c, x.for_print),
                 'sources': get_source_definitions(element_id, c, data_uri),
-                'layers': get_layer_definitions(element_id, c),
-            }),
-        ]
+                'layers': get_layer_definitions(element_id, c)})]
         return {
-            'css_uris': self.css_uris,
-            'js_uris': self.js_uris,
-            'main_text': main_text,
-            'js_texts': js_texts,
-        }
+            'css_uris': self.css_uris, 'js_uris': self.js_uris,
+            'main_text': main_text, 'js_texts': js_texts}
 
 
 class MapMapboxLocationView(VariableView):
@@ -71,11 +66,10 @@ class MapMapboxLocationView(VariableView):
 
     def render_input(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
-        variable_id = self.variable_id
         element_id = x.id
         view_name = self.view_name
         c = b.get_variable_configuration(variable_definition)
-        data = b.get_data(variable_definition)
+        data = b.load_data(variable_definition)
         if 'value' in data:
             v = data['value']
             try:
@@ -86,7 +80,7 @@ class MapMapboxLocationView(VariableView):
             c['longitude'], c['latitude'] = longitude, latitude
             c['zoom'] = zoom
         main_text = get_map_html(
-            element_id, variable_id, c, x.mode_name, view_name,
+            element_id, self.variable_id, c, x.mode_name, view_name,
             x.design_name, MAP_MAPBOX_LOCATION_INPUT_HTML.render({
                 'view_name': view_name, 'element_id': element_id}))
         js_texts = [
@@ -99,11 +93,8 @@ class MapMapboxLocationView(VariableView):
                 'map': get_map_definition(element_id, c, x.for_print)}),
         ]
         return {
-            'css_uris': self.css_uris,
-            'js_uris': self.js_uris,
-            'main_text': main_text,
-            'js_texts': js_texts,
-        }
+            'css_uris': self.css_uris, 'js_uris': self.js_uris,
+            'main_text': main_text, 'js_texts': js_texts}
 
 
 class MapDeckScreenGridView(VariableView):
@@ -143,15 +134,10 @@ class MapDeckScreenGridView(VariableView):
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),
-                'for_print': x.for_print,
-            }),
-        ]
+                'for_print': x.for_print})]
         return {
-            'css_uris': self.css_uris,
-            'js_uris': self.js_uris,
-            'main_text': main_text,
-            'js_texts': js_texts,
-        }
+            'css_uris': self.css_uris, 'js_uris': self.js_uris,
+            'main_text': main_text, 'js_texts': js_texts}
 
 
 def save_map_configuration(xy_array, source_path):

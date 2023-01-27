@@ -1,11 +1,13 @@
 async function refreshMapMapbox(elementId, dataUri, map) {
-  const r = await fetch(dataUri), { status } = r;
-  if (status != 200) {
-    throw { status };
+  let d;
+  try {
+    const r = await fetch(dataUri);
+    d = await r.json();
+  } catch {
+    return;
   }
-  const d = await r.json(), bounds = turf.bbox(d);
   map.getSource(elementId).setData(d);
-  jumpToBounds(map, bounds);
+  jumpToBounds(map, turf.bbox(d));
 }
 function jumpToBounds(map, bounds) {
   map.jumpTo(map.cameraForBounds(bounds));

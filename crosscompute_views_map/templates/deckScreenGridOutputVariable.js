@@ -38,6 +38,6 @@ setTimeout(function {{ element_id }}UpdateViewState() {
   });
 }, 0);
 {% endif %}
-registerElement('{{ variable_id }}', function () {
+registerElement('{{ variable_id }}', function() {
   refreshMapDeckScreenGrid('{{ element_id }}', '{{ data_uri }}', {{ element_id }}, {{ element_id }}LayerOptions);
 });

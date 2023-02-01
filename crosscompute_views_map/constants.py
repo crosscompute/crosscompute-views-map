@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 PACKAGE_FOLDER = Path(__file__).parent
-TEMPLATES_FOLDER = PACKAGE_FOLDER / 'templates'
+ASSETS_FOLDER = PACKAGE_FOLDER / 'assets'
 
 
 MAPBOX_CSS_URI = 'https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css'

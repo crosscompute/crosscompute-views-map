@@ -2,21 +2,19 @@
 # TODO: Let creator override js template
 import json
 from os import environ
-from string import Template as StringTemplate
 
 import geojson
 import numpy as np
 from crosscompute.routines.interface import Batch
 from crosscompute.routines.variable import (
     Element, VariableView, add_label_html)
-from jinja2 import Template as JinjaTemplate
 
 from ..constants import (
     DECK_JS_URI,
     MAPBOX_CSS_URI,
     MAPBOX_JS_URI,
-    TEMPLATES_FOLDER,
     TURF_JS_URI)
+from .asset import asset_storage
 
 
 class MapMapboxView(VariableView):
@@ -215,31 +213,26 @@ def get_layer_definitions(element_id, variable_configuration):
     return definitions
 
 
-def load_view_text(file_name):
-    return open(TEMPLATES_FOLDER / file_name).read().strip()
-
-
 MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
-MAP_MAPBOX_HTML = StringTemplate(load_view_text('mapbox.html'))
-MAP_MAPBOX_JS_HEADER = load_view_text(
-    'mapboxHeader.js')
 
 
-MAP_MAPBOX_OUTPUT_JS_HEADER = load_view_text(
-    'mapboxOutputHeader.js')
-MAP_MAPBOX_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'mapboxOutputVariable.js'), trim_blocks=True)
+MAP_MAPBOX_HTML = asset_storage.load_string_text('mapbox.html')
+MAP_MAPBOX_JS_HEADER = asset_storage.load_raw_text('mapbox-header.js')
+MAP_MAPBOX_OUTPUT_JS_HEADER = asset_storage.load_raw_text(
+    'mapbox-output-header.js')
+MAP_MAPBOX_OUTPUT_JS_VARIABLE = asset_storage.load_jinja_text(
+    'mapbox-output-variable.js')
 
 
-MAP_MAPBOX_LOCATION_INPUT_HTML = JinjaTemplate(load_view_text(
-    'mapboxLocationInput.html'), trim_blocks=True)
-MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = JinjaTemplate(load_view_text(
-    'mapboxLocationInputHeader.js'), trim_blocks=True)
-MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'mapboxLocationInputVariable.js'), trim_blocks=True)
+MAP_MAPBOX_LOCATION_INPUT_HTML = asset_storage.load_jinja_text(
+    'mapbox-location-input.html')
+MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = asset_storage.load_jinja_text(
+    'mapbox-location-input-header.js')
+MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = asset_storage.load_jinja_text(
+    'mapbox-location-input-variable.js')
 
 
-MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER = load_view_text(
-    'deckScreenGridOutputHeader.js')
-MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE = JinjaTemplate(load_view_text(
-    'deckScreenGridOutputVariable.js'), trim_blocks=True)
+MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER = asset_storage.load_raw_text(
+    'deck-screengrid-output-header.js')
+MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE = asset_storage.load_jinja_text(
+    'deck-screengrid-output-variable.js')

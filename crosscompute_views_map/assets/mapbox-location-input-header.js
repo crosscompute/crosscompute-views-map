@@ -10,8 +10,13 @@ GET_DATA_BY_VIEW_NAME['{{ view_name }}'] = x => {
   };
 };
 for (var e of document.getElementsByClassName('_{{ view_name }}-geolocate')) {
-  e.onclick = function() {
-    const { element: elementId } = e.dataset;
-    MAP_BY_ELEMENT_ID[elementId].controlByName.geolocate.trigger();
+  if (isSecure) {
+    e.onclick = function() {
+      const { element: elementId } = e.dataset;
+      MAP_BY_ELEMENT_ID[elementId].controlByName.geolocate.trigger();
+    }
+  } else {
+    e.disabled = true;
+    e.innerHTML = 'Geolocation is disabled because connection is not secure';
   }
 }

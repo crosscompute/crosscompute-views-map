@@ -14,5 +14,5 @@ registerFunction('{{ variable_id }}', async function() {
   while (!{{ element_id }}.loaded()) {
     await sleep(1000);
   }
-  refreshMapMapbox('{{ element_id }}', '{{ data_uri }}', {{ element_id }});
+  await refreshMapMapbox('{{ element_id }}', '{{ data_uri }}', {{ element_id }});
 });

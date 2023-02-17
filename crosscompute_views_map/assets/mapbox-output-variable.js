@@ -10,9 +10,9 @@ const {{ element_id }} = setupMapMapbox(new mapboxgl.Map({{ map }}), '{{ element
   jumpToBounds({{ element_id }}, {{ bounds }});
 {% endif %}
 });
-registerElement('{{ variable_id }}', async function() {
+registerFunction('{{ variable_id }}', async function() {
   while (!{{ element_id }}.loaded()) {
     await sleep(1000);
   }
-  await refreshMapMapbox('{{ element_id }}', '{{ data_uri }}', {{ element_id }});
+  refreshMapMapbox('{{ element_id }}', '{{ data_uri }}', {{ element_id }});
 });

@@ -5,8 +5,9 @@ PACKAGE_FOLDER = Path(__file__).parent
 ASSETS_FOLDER = PACKAGE_FOLDER / 'assets'
 
 
-MAPBOX_CSS_URI = 'https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css'
-MAPBOX_JS_URI = 'https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js'
+MAPBOX_CSS_URI = 'https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css'
+MAPBOX_JS_URI = 'https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js'
+MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v11'
 
 
 TURF_JS_URI = (

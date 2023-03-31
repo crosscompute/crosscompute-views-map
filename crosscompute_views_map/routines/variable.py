@@ -13,8 +13,19 @@ from ..constants import (
     DECK_JS_URI,
     MAPBOX_CSS_URI,
     MAPBOX_JS_URI,
+    MAPBOX_STYLE_URI,
     TURF_JS_URI)
-from .asset import asset_storage
+from .asset import (
+    MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER,
+    MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE,
+    MAP_CSS,
+    MAP_MAPBOX_HTML,
+    MAP_MAPBOX_JS_HEADER,
+    MAP_MAPBOX_LOCATION_INPUT_HTML,
+    MAP_MAPBOX_LOCATION_INPUT_JS_HEADER,
+    MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE,
+    MAP_MAPBOX_OUTPUT_JS_HEADER,
+    MAP_MAPBOX_OUTPUT_JS_VARIABLE)
 
 
 class MapMapboxView(VariableView):
@@ -22,6 +33,7 @@ class MapMapboxView(VariableView):
     view_name = 'map-mapbox'
     environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
     css_uris = [MAPBOX_CSS_URI]
+    css_texts = [MAP_CSS]
     js_uris = [MAPBOX_JS_URI, TURF_JS_URI]
 
     def process(self, path):
@@ -51,8 +63,9 @@ class MapMapboxView(VariableView):
                 'sources': get_source_definitions(element_id, c, data_uri),
                 'layers': get_layer_definitions(element_id, c)})]
         return {
-            'css_uris': self.css_uris, 'js_uris': self.js_uris,
-            'main_text': main_text, 'js_texts': js_texts}
+            'css_uris': self.css_uris, 'css_texts': self.css_texts,
+            'js_uris': self.js_uris, 'js_texts': js_texts,
+            'main_text': main_text}
 
 
 class MapMapboxLocationView(VariableView):
@@ -60,6 +73,7 @@ class MapMapboxLocationView(VariableView):
     view_name = 'map-mapbox-location'
     environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
     css_uris = [MAPBOX_CSS_URI]
+    css_texts = [MAP_CSS]
     js_uris = [MAPBOX_JS_URI]
 
     def render_input(self, b: Batch, x: Element):
@@ -88,11 +102,11 @@ class MapMapboxLocationView(VariableView):
                 'view_name': view_name}),
             MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
                 'element_id': element_id,
-                'map': get_map_definition(element_id, c, x.for_print)}),
-        ]
+                'map': get_map_definition(element_id, c, x.for_print)})]
         return {
-            'css_uris': self.css_uris, 'js_uris': self.js_uris,
-            'main_text': main_text, 'js_texts': js_texts}
+            'css_uris': self.css_uris, 'css_texts': self.css_texts,
+            'js_uris': self.js_uris, 'js_texts': js_texts,
+            'main_text': main_text}
 
 
 class MapDeckScreenGridView(VariableView):
@@ -100,6 +114,7 @@ class MapDeckScreenGridView(VariableView):
     view_name = 'map-deck-screengrid'
     environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
     css_uris = [MAPBOX_CSS_URI]
+    css_texts = [MAP_CSS]
     js_uris = [MAPBOX_JS_URI, DECK_JS_URI]
 
     def process(self, path):
@@ -127,15 +142,16 @@ class MapDeckScreenGridView(VariableView):
                 'opacity': c.get('opacity', 0.5),
                 'get_position_definition_string': c.get('position', 'd => d'),
                 'get_weight_definition_string': c.get('weight', 1),
-                'style_uri': c.get('style', MAP_MAPBOX_STYLE_URI),
+                'style_uri': c.get('style', MAPBOX_STYLE_URI),
                 'bounds': c.get('bounds'),
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),
                 'for_print': x.for_print})]
         return {
-            'css_uris': self.css_uris, 'js_uris': self.js_uris,
-            'main_text': main_text, 'js_texts': js_texts}
+            'css_uris': self.css_uris, 'css_texts': self.css_texts,
+            'js_uris': self.js_uris, 'js_texts': js_texts,
+            'main_text': main_text}
 
 
 def save_map_configuration(xy_array, source_path):
@@ -143,16 +159,9 @@ def save_map_configuration(xy_array, source_path):
         xs = xy_array[:, 0]
         ys = xy_array[:, 1]
     except IndexError:
-        d = {
-            'longitude': 0,
-            'latitude': 0,
-            'zoom': 0,
-        }
+        d = {'longitude': 0, 'latitude': 0, 'zoom': 0}
     else:
-        d = {
-            'longitude': xs.mean(),
-            'latitude': ys.mean(),
-        }
+        d = {'longitude': xs.mean(), 'latitude': ys.mean()}
         if len(xs) == 1:
             d['zoom'] = 15
         else:
@@ -168,8 +177,7 @@ def get_map_html(
         'element_id': element_id,
         'mode_name': mode_name,
         'view_name': view_name,
-        'variable_id': variable_id,
-    })
+        'variable_id': variable_id})
     if design_name not in ['none']:
         main_text = add_label_html(
             main_text, variable_configuration, variable_id, element_id)
@@ -177,7 +185,7 @@ def get_map_html(
 
 
 def get_map_definition(element_id, variable_configuration, for_print):
-    style_uri = variable_configuration.get('style', MAP_MAPBOX_STYLE_URI)
+    style_uri = variable_configuration.get('style', MAPBOX_STYLE_URI)
     longitude = variable_configuration.get('longitude', 0)
     latitude = variable_configuration.get('latitude', 0)
     zoom = variable_configuration.get('zoom', 0)
@@ -185,8 +193,7 @@ def get_map_definition(element_id, variable_configuration, for_print):
         'container': element_id,
         'style': style_uri,
         'center': [longitude, latitude],
-        'zoom': zoom,
-    }
+        'zoom': zoom}
     if for_print:
         d['preserveDrawingBuffer'] = 1
     return d
@@ -196,8 +203,7 @@ def get_source_definitions(element_id, variable_configuration, data_uri):
     return variable_configuration.get('sources', [{
         'id': element_id,
         'type': 'geojson',
-        'data': data_uri,
-    }])
+        'data': data_uri}])
 
 
 def get_layer_definitions(element_id, variable_configuration):
@@ -211,28 +217,3 @@ def get_layer_definitions(element_id, variable_configuration):
             d['source'] = element_id
         definitions.append(d)
     return definitions
-
-
-MAP_MAPBOX_STYLE_URI = 'mapbox://styles/mapbox/dark-v10'
-
-
-MAP_MAPBOX_HTML = asset_storage.load_string_text('mapbox.html')
-MAP_MAPBOX_JS_HEADER = asset_storage.load_raw_text('mapbox-header.js')
-MAP_MAPBOX_OUTPUT_JS_HEADER = asset_storage.load_raw_text(
-    'mapbox-output-header.js')
-MAP_MAPBOX_OUTPUT_JS_VARIABLE = asset_storage.load_jinja_text(
-    'mapbox-output-variable.js')
-
-
-MAP_MAPBOX_LOCATION_INPUT_HTML = asset_storage.load_jinja_text(
-    'mapbox-location-input.html')
-MAP_MAPBOX_LOCATION_INPUT_JS_HEADER = asset_storage.load_jinja_text(
-    'mapbox-location-input-header.js')
-MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE = asset_storage.load_jinja_text(
-    'mapbox-location-input-variable.js')
-
-
-MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER = asset_storage.load_raw_text(
-    'deck-screengrid-output-header.js')
-MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE = asset_storage.load_jinja_text(
-    'deck-screengrid-output-variable.js')

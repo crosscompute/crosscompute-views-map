@@ -7,7 +7,7 @@ import geojson
 import numpy as np
 from crosscompute.routines.interface import Batch
 from crosscompute.routines.variable import (
-    Element, VariableView, add_label_html)
+    Element, VariableView)
 
 from ..constants import (
     DECK_JS_URI,
@@ -178,9 +178,6 @@ def get_map_html(
         'mode_name': mode_name,
         'view_name': view_name,
         'variable_id': variable_id})
-    if design_name not in ['none']:
-        main_text = add_label_html(
-            main_text, variable_configuration, variable_id, element_id)
     return main_text
 
 

@@ -9,14 +9,14 @@ GET_DATA_BY_VIEW_NAME['{{ view_name }}'] = x => {
     value: { bounds: [_sw.lng, _sw.lat, _ne.lng, _ne.lat], center: [lng, lat], zoom },
   };
 };
-for (var e of document.getElementsByClassName('_{{ view_name }}-geolocate')) {
+for (var l of document.getElementsByClassName('_{{ view_name }}-geolocate')) {
   if (isSecure) {
-    e.onclick = function() {
-      const { element: elementId } = e.dataset;
+    l.onclick = function() {
+      const { element: elementId } = l.dataset;
       MAP_BY_ELEMENT_ID[elementId].controlByName.geolocate.trigger();
     }
   } else {
-    e.disabled = true;
-    e.innerHTML = 'Geolocation is disabled because connection is not secure';
+    l.disabled = true;
+    l.innerHTML = 'Geolocation is disabled because connection is not secure';
   }
 }

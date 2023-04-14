@@ -16,16 +16,16 @@ from ..constants import (
     MAPBOX_STYLE_URI,
     TURF_JS_URI)
 from .asset import (
-    MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER,
-    MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE,
     MAP_CSS,
+    MAP_DECK_SCREENGRID_OUTPUT_HEADER_JS,
+    MAP_DECK_SCREENGRID_OUTPUT_JS,
+    MAP_MAPBOX_HEADER_JS,
     MAP_MAPBOX_HTML,
-    MAP_MAPBOX_JS_HEADER,
+    MAP_MAPBOX_LOCATION_INPUT_HEADER_JS,
     MAP_MAPBOX_LOCATION_INPUT_HTML,
-    MAP_MAPBOX_LOCATION_INPUT_JS_HEADER,
-    MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE,
-    MAP_MAPBOX_OUTPUT_JS_HEADER,
-    MAP_MAPBOX_OUTPUT_JS_VARIABLE)
+    MAP_MAPBOX_LOCATION_INPUT_JS,
+    MAP_MAPBOX_OUTPUT_HEADER_JS,
+    MAP_MAPBOX_OUTPUT_JS)
 
 
 class MapMapboxView(VariableView):
@@ -52,9 +52,9 @@ class MapMapboxView(VariableView):
             x.design_name)
         js_texts = [
             "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
-            MAP_MAPBOX_JS_HEADER,
-            MAP_MAPBOX_OUTPUT_JS_HEADER,
-            MAP_MAPBOX_OUTPUT_JS_VARIABLE.render({
+            MAP_MAPBOX_HEADER_JS,
+            MAP_MAPBOX_OUTPUT_HEADER_JS,
+            MAP_MAPBOX_OUTPUT_JS.render({
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,
@@ -97,10 +97,10 @@ class MapMapboxLocationView(VariableView):
                 'view_name': view_name, 'element_id': element_id}))
         js_texts = [
             "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
-            MAP_MAPBOX_JS_HEADER,
-            MAP_MAPBOX_LOCATION_INPUT_JS_HEADER.render({
+            MAP_MAPBOX_HEADER_JS,
+            MAP_MAPBOX_LOCATION_INPUT_HEADER_JS.render({
                 'view_name': view_name}),
-            MAP_MAPBOX_LOCATION_INPUT_JS_VARIABLE.render({
+            MAP_MAPBOX_LOCATION_INPUT_JS.render({
                 'element_id': element_id,
                 'map': get_map_definition(element_id, c, x.for_print)})]
         return {
@@ -134,8 +134,8 @@ class MapDeckScreenGridView(VariableView):
             x.design_name)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
-            MAP_DECK_SCREENGRID_OUTPUT_JS_HEADER,
-            MAP_DECK_SCREENGRID_OUTPUT_JS_VARIABLE.render({
+            MAP_DECK_SCREENGRID_OUTPUT_HEADER_JS,
+            MAP_DECK_SCREENGRID_OUTPUT_JS.render({
                 'variable_id': variable_id,
                 'element_id': element_id,
                 'data_uri': data_uri,

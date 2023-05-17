@@ -46,7 +46,7 @@ class MapMapboxView(VariableView):
         variable_id = self.variable_id
         element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
-        c = b.get_variable_configuration(variable_definition)
+        c = b.get_data_configuration(variable_definition)
         main_text = get_map_html(
             element_id, variable_id, c, x.mode_name, self.view_name,
             x.design_name)
@@ -80,7 +80,7 @@ class MapMapboxLocationView(VariableView):
         variable_definition = self.variable_definition
         element_id = x.id
         view_name = self.view_name
-        c = b.get_variable_configuration(variable_definition)
+        c = b.get_data_configuration(variable_definition)
         data = b.load_data(variable_definition)
         if 'value' in data:
             v = data['value']
@@ -127,7 +127,7 @@ class MapDeckScreenGridView(VariableView):
         variable_id = self.variable_id
         element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
-        c = b.get_variable_configuration(variable_definition)
+        c = b.get_data_configuration(variable_definition)
         mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
             element_id, variable_id, c, x.mode_name, self.view_name,

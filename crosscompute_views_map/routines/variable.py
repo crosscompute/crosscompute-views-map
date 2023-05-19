@@ -44,12 +44,11 @@ class MapMapboxView(VariableView):
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
         variable_id = self.variable_id
-        element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_data_configuration(variable_definition)
+        element_id = x.id
         main_text = get_map_html(
-            element_id, variable_id, c, x.mode_name, self.view_name,
-            x.design_name)
+            element_id, x.mode_name, self.view_name, variable_id)
         js_texts = [
             "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
             MAP_MAPBOX_HEADER_JS,
@@ -59,7 +58,8 @@ class MapMapboxView(VariableView):
                 'element_id': element_id,
                 'data_uri': data_uri,
                 'bounds': c.get('bounds'),
-                'map': get_map_definition(element_id, c, x.for_print),
+                'map': get_map_definition(
+                    element_id, c, x.layout_settings['for_print']),
                 'sources': get_source_definitions(element_id, c, data_uri),
                 'layers': get_layer_definitions(element_id, c)})]
         return {
@@ -78,23 +78,19 @@ class MapMapboxLocationView(VariableView):
 
     def render_input(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
-        element_id = x.id
         view_name = self.view_name
-        c = b.get_data_configuration(variable_definition)
         data = b.load_data(variable_definition)
+        c = b.get_data_configuration(variable_definition)
+        element_id = x.id
         if 'value' in data:
-            v = data['value']
-            try:
-                longitude, latitude = v['center']
-                zoom = v['zoom']
-            except (KeyError, TypeError):
-                longitude, latitude, zoom = 0, 0, 0
+            longitude, latitude, zoom = get_location_pack_from_value(
+                data['value'])
             c['longitude'], c['latitude'] = longitude, latitude
             c['zoom'] = zoom
-        main_text = get_map_html(
-            element_id, self.variable_id, c, x.mode_name, view_name,
-            x.design_name, MAP_MAPBOX_LOCATION_INPUT_HTML.render({
-                'view_name': view_name, 'element_id': element_id}))
+        prefix_text = MAP_MAPBOX_LOCATION_INPUT_HTML.render({
+            'view_name': view_name, 'element_id': element_id})
+        main_text = prefix_text + get_map_html(
+            element_id, x.mode_name, view_name, self.variable_id)
         js_texts = [
             "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
             MAP_MAPBOX_HEADER_JS,
@@ -102,7 +98,8 @@ class MapMapboxLocationView(VariableView):
                 'view_name': view_name}),
             MAP_MAPBOX_LOCATION_INPUT_JS.render({
                 'element_id': element_id,
-                'map': get_map_definition(element_id, c, x.for_print)})]
+                'map': get_map_definition(
+                    element_id, c, x.layout_settings['for_print'])})]
         return {
             'css_uris': self.css_uris, 'css_texts': self.css_texts,
             'js_uris': self.js_uris, 'js_texts': js_texts,
@@ -125,13 +122,12 @@ class MapDeckScreenGridView(VariableView):
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
         variable_id = self.variable_id
-        element_id = x.id
         data_uri = b.get_data_uri(variable_definition, x)
         c = b.get_data_configuration(variable_definition)
+        element_id = x.id
         mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
-            element_id, variable_id, c, x.mode_name, self.view_name,
-            x.design_name)
+            element_id, x.mode_name, self.view_name, variable_id)
         js_texts = [
             f"mapboxgl.accessToken = '{mapbox_token}';",
             MAP_DECK_SCREENGRID_OUTPUT_HEADER_JS,
@@ -147,7 +143,7 @@ class MapDeckScreenGridView(VariableView):
                 'longitude': c.get('longitude', 0),
                 'latitude': c.get('latitude', 0),
                 'zoom': c.get('zoom', 0),
-                'for_print': x.for_print})]
+                'for_print': x.layout_settings['for_print']})]
         return {
             'css_uris': self.css_uris, 'css_texts': self.css_texts,
             'js_uris': self.js_uris, 'js_texts': js_texts,
@@ -170,15 +166,12 @@ def save_map_configuration(xy_array, source_path):
         json.dump(d, f)
 
 
-def get_map_html(
-        element_id, variable_id, variable_configuration, mode_name, view_name,
-        design_name, prefix_html=''):
-    main_text = prefix_html + MAP_MAPBOX_HTML.substitute({
+def get_map_html(element_id, mode_name, view_name, variable_id):
+    return MAP_MAPBOX_HTML.substitute({
         'element_id': element_id,
         'mode_name': mode_name,
         'view_name': view_name,
         'variable_id': variable_id})
-    return main_text
 
 
 def get_map_definition(element_id, variable_configuration, for_print):
@@ -214,3 +207,12 @@ def get_layer_definitions(element_id, variable_configuration):
             d['source'] = element_id
         definitions.append(d)
     return definitions
+
+
+def get_location_pack_from_value(value):
+    try:
+        longitude, latitude = value['center']
+        zoom = value['zoom']
+    except (KeyError, TypeError):
+        longitude, latitude, zoom = 0, 0, 0
+    return longitude, latitude, zoom

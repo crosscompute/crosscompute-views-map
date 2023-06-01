@@ -15,3 +15,6 @@ TURF_JS_URI = (
 
 
 DECK_JS_URI = 'https://unpkg.com/deck.gl@latest/dist.min.js'
+
+NEBULA_CSS_URI = ''
+NEBULA_JS_URI = 'https://cdn.jsdelivr.net/gh/devlabmexico/demos@master/nebula-demo/public/dist/index_bundle.js'

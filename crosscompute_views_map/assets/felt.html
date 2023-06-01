@@ -1,0 +1,15 @@
+{% if value %}
+<div id="{{element_id}}" class="_{{mode_name}} _{{view_name}} {{variable_id}}" data-view="{{view_name}}" data-variable="{{variable_id}}">
+    <a href="{{value}}" target="_blank">Edit map</a>
+    <label for="felt_url">Felt URL</label>
+    <input type="url" value="{{value}}" id="felt_url" />
+    <iframe width="100%" height="450" frameborder="0" title="Felt Map" src="https://felt.com/embed{{map_config}}"></iframe>
+</div>
+{% else %}
+<div id="{{element_id}}" class="_{{mode_name}} _{{view_name}} {{variable_id}}" data-view="{{view_name}}" data-variable="{{variable_id}}">
+    <a href="https://felt.com/map/new" target="_blank">New map</a>
+    <label for="felt_url">Felt URL</label>
+    <input type="url" value="" id="felt_url" />
+    <iframe width="100%" height="450" frameborder="0" title="Felt Map" src=""></iframe>
+</div>
+{% endif %}

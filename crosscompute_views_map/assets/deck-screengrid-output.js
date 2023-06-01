@@ -7,7 +7,7 @@ const {{ element_id }}LayerOptions = {
 const {{ element_id }}Layer = new deck.ScreenGridLayer({{ element_id }}LayerOptions);
 const {{ element_id }} = new deck.DeckGL({
   container: '{{ element_id }}',
-  mapboxApiAccessToken: mapboxgl.accessToken,
+  mapboxApiAccessToken: $.Nebula..accessToken,
   mapStyle: '{{ style_uri }}',
   initialViewState: {
     longitude: {{ longitude }},

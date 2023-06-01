@@ -1,0 +1,28 @@
+---
+crosscompute: 0.9.4
+
+name: Test views for map
+slug: automation-x
+title: Automation X - Improve health, safety, quality of life
+description: Improve health, safety, quality of life in our communities
+version: 0.0.1
+
+
+input:
+  variables:
+    - id: nebula
+      view: map-nebula
+      path: x.geojson
+    - id: felt
+      view: map-mapbox
+      path: y.geojson
+
+output:
+  templates:
+    - path: output.md
+
+batches:
+  - folder: batches/standard
+
+scripts:
+  - command: cp {input_folder}/* {output_folder}/

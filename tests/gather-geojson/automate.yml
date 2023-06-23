@@ -4,9 +4,9 @@ name: Gather GeoJSON
 version: 0.0.1
 input:
   variables:
-    - id: felt
-      view: map-mapbox
-      path: x.geojson
+#   - id: felt
+#     view: map-mapbox
+#     path: x.geojson
     - id: nebula
       view: map-nebula
       path: y.geojson

@@ -132,6 +132,7 @@ class MapMapboxLocationView(VariableView):
         main_text = prefix_text + get_map_html(
             element_id, x.mode_name, view_name, self.variable_id)
         js_texts = [
+            # !!!
             "$.Nebula.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
             MAP_MAPBOX_HEADER_JS,
             MAP_MAPBOX_LOCATION_INPUT_HEADER_JS.render({

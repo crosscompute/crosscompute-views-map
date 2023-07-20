@@ -16,7 +16,4 @@
       iframe.style.display = 'none'
     }
   })
-
-
 })();
-

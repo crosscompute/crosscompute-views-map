@@ -6,10 +6,10 @@ input:
   variables:
 #   - id: felt
 #     view: map-mapbox
-#     path: x.geojson
+#     path: felt.geojson
     - id: nebula
       view: map-nebula
-      path: y.geojson
+      path: nebula.geojson
 output:
   templates:
     - path: output.md

@@ -51,7 +51,6 @@ class MapMapboxView(VariableView):
         element_id = x.id
         view_name = self.view_name
         data = b.load_data(variable_definition)
-
         data_uri = b.get_data_uri(variable_definition, x)
 
         value = data.get('value', '')

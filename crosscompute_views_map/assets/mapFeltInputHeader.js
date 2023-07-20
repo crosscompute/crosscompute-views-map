@@ -1,21 +1,9 @@
-// GET_DATA_BY_VIEW_NAME['$view_name'] = async? x => {
 GET_DATA_BY_VIEW_NAME['$view_name'] = x => {
   const map = x.querySelector('#felt_url').value;
   try {
     let feltUrl = new URL(map);
     if (feltUrl.hostname !== 'felt.com') return;
     let geojsonUrl = 'https://' + feltUrl.hostname + '/' + feltUrl.pathname + '.geojson'
-    /*
-      fetch(geojsonUrl)
-        .then(response => response.body)
-        .then(body => body.toJSON())
-        .then(geojson => feltGeojson.value = geojson)
-        .catch(e => {
-          console.log(e);
-
-        })
-    */
-    console.log(geojsonUrl)
     return {
       uri: geojsonUrl
     }

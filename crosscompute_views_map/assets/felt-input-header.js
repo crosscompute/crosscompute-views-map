@@ -1,3 +1,4 @@
+/*
 GET_DATA_BY_VIEW_NAME['$view_name'] = x => {
   const map = x.querySelector('#felt_url').value;
   try {
@@ -29,22 +30,16 @@ function getFeltPath(url) {
   return false;
 }
 
-async function refreshFelt(elementId, elementAttribute, dataUri, dataValue) {
-  let x = dataValue;
-  if (x === undefined) {
-    try {
-      const r = await fetch(dataUri), { status } = r;
-      if (status != 200) return;
-      x = await r.text();
-    } catch {
-      return;
-    }
+async function refreshFelt(elementId, dataUri) {
+  try {
+    const r = await fetch(dataUri), { status } = r;
+    if (status != 200) return;
+    x = await r.text();
+  } catch {
+    return;
   }
-
-  // Refresh felt embed preview
-  //  document.getElementById(elementId).contentWindow.location.reload();
-
   const l = document.getElementById(elementId);
-  l[elementAttribute] = typeof x === 'object' ? JSON.stringify(x) : x;
+  l.value = typeof x === 'object' ? JSON.stringify(x) : x;
   return l;
 }
+*/

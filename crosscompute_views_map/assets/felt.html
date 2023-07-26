@@ -1,6 +1,5 @@
 <div id="{{ element_id }}" class="_{{ mode_name }} _{{ view_name }} {{ variable_id }}" data-view="{{ view_name }}" data-variable="{{ variable_id }}">
-<a href="{{ value or 'https://felt.com/map/new' }}" target="_blank">{{ 'Edit map' if value else 'Create map' }}</a>
-<label for="felt_uri">Felt URI</label>
-<input type="url" value="{{ value or '' }}" id="felt_uri">
-<iframe width="100%" height="450" frameborder="0" src="{{ 'https://felt.com/embed{{ felt_path }}' if value else '' }}"></iframe>
+<a href="{{ felt_uri or 'https://felt.com/map/new' }}" target="_blank">{{ 'Edit existing map' if felt_uri else 'Make a new map and paste the resulting URI below' }}</a>
+<input id="felt_uri" type="url" value="{{ felt_uri }}" placeholder="https://felt.com/map/abc">
+<iframe class="_map" frameborder="0" src="{{ 'https://felt.com/embed{{ felt_path }}' if felt_uri else '' }}"></iframe>
 </div>

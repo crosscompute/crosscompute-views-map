@@ -32,15 +32,15 @@ MAP_DECK_SCREENGRID_OUTPUT_HEADER_JS = asset_storage.load_raw_text(
 MAP_DECK_SCREENGRID_OUTPUT_JS = asset_storage.load_jinja_text(
     'deck-screengrid-output.js')
 
+
+MAP_FELT_CSS = asset_storage.load_raw_text('felt.css')
 MAP_FELT_HTML = asset_storage.load_jinja_text('felt.html')
-
-MAP_FELT_INPUT_JS_HEADER = asset_storage.load_string_text('mapFeltInputHeader.js')
-
-MAP_FELT_INPUT_JS_VARIABLE = asset_storage.load_jinja_text('mapFeltInputVariable.js')
+MAP_FELT_INPUT_HEADER_JS = asset_storage.load_string_text(
+    'felt-input-header.js')
+MAP_FELT_INPUT_JS = asset_storage.load_string_text('felt-input.js')
 
 
 MAP_NEBULA_HTML = asset_storage.load_string_text('nebula.html')
-
-
-MAP_NEBULA_LOCATION_INPUT_JS_HEADER = asset_storage.load_string_text('nebulaLocationInputHeader.js')
-MAP_NEBULA_LOCATION_INPUT_JS_VARIABLE = asset_storage.load_jinja_text('nebulaLocationInputVariable.js')
+MAP_NEBULA_INPUT_HEADER_JS = asset_storage.load_string_text(
+    'nebula-input-header.js')
+MAP_NEBULA_INPUT_JS = asset_storage.load_jinja_text('nebula-input.js')

@@ -2,7 +2,7 @@
 # TODO: Let creator override js template
 import json
 from os import environ
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 
 import geojson
 import numpy as np
@@ -22,14 +22,21 @@ from .asset import (
     MAP_CSS,
     MAP_DECK_SCREENGRID_OUTPUT_HEADER_JS,
     MAP_DECK_SCREENGRID_OUTPUT_JS,
+    MAP_FELT_CSS,
+    MAP_FELT_HTML,
+    # MAP_FELT_INPUT_HEADER_JS,
+    # MAP_FELT_INPUT_JS,
     MAP_MAPBOX_HEADER_JS,
     MAP_MAPBOX_HTML,
     MAP_MAPBOX_LOCATION_INPUT_HEADER_JS,
     MAP_MAPBOX_LOCATION_INPUT_HTML,
     MAP_MAPBOX_LOCATION_INPUT_JS,
     MAP_MAPBOX_OUTPUT_HEADER_JS,
-    MAP_MAPBOX_OUTPUT_JS, MAP_FELT_HTML, MAP_FELT_INPUT_JS_HEADER, MAP_FELT_INPUT_JS_VARIABLE,
-    MAP_NEBULA_HTML, MAP_NEBULA_LOCATION_INPUT_JS_HEADER, MAP_NEBULA_LOCATION_INPUT_JS_VARIABLE)
+    MAP_MAPBOX_OUTPUT_JS,
+    # MAP_NEBULA_HTML,
+    # MAP_NEBULA_INPUT_HEADER_JS,
+    # MAP_NEBULA_INPUT_JS,
+)
 
 
 class MapMapboxView(VariableView):
@@ -44,41 +51,6 @@ class MapMapboxView(VariableView):
         with path.open('rt') as f:
             array = np.array(list(geojson.utils.coords(json.load(f))))
         save_map_configuration(array, path)
-
-    def render_input(self, b: Batch, x: Element):
-        variable_definition = self.variable_definition
-        variable_id = self.variable_id
-        element_id = x.id
-        view_name = self.view_name
-        data = b.load_data(variable_definition)
-        data_uri = b.get_data_uri(variable_definition, x)
-
-        value = data.get('value', '')
-        if type(value) is dict:
-            value = value.get('uri', '')
-
-        url = urlparse(value.rstrip('.geojson'))
-        main_text = MAP_FELT_HTML.render({
-            'element_id': element_id,
-            'mode_name': x.mode_name,
-            'map_config': url.path,
-            'view_name': view_name,
-            'variable_id': variable_id,
-            'value': value})
-        js_texts = [
-            MAP_FELT_INPUT_JS_HEADER.substitute({
-                'view_name': view_name,
-            }),
-            MAP_FELT_INPUT_JS_VARIABLE.render({
-                'element_id': element_id,
-                'view_name': view_name,
-                'data_uri': data_uri
-            })
-        ]
-
-        return {
-            'css_uris': [], 'css_texts': [], 'js_uris': [],
-            'main_text': main_text, 'js_texts': js_texts}
 
     def render_output(self, b: Batch, x: Element):
         variable_definition = self.variable_definition
@@ -131,8 +103,7 @@ class MapMapboxLocationView(VariableView):
         main_text = prefix_text + get_map_html(
             element_id, x.mode_name, view_name, self.variable_id)
         js_texts = [
-            # !!!
-            "$.Nebula.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
+            "mapboxgl.accessToken = '%s';" % environ['MAPBOX_TOKEN'],
             MAP_MAPBOX_HEADER_JS,
             MAP_MAPBOX_LOCATION_INPUT_HEADER_JS.render({
                 'view_name': view_name}),
@@ -146,7 +117,52 @@ class MapMapboxLocationView(VariableView):
             'main_text': main_text}
 
 
-class MapNebula(VariableView):
+class MapFeltView(VariableView):
+
+    view_name = 'map-felt'
+    css_texts = [MAP_FELT_CSS]
+
+    def render_input(self, b: Batch, x: Element):
+        variable_definition = self.variable_definition
+        variable_id = self.variable_id
+        view_name = self.view_name
+        element_id = x.id
+        c = b.get_data_configuration(variable_definition)
+        main_text = MAP_FELT_HTML.render({
+            'element_id': element_id,
+            'mode_name': x.mode_name,
+            'view_name': view_name,
+            'variable_id': variable_id,
+            'felt_uri': c.get('uri', '')})
+        return {
+            'css_uris': [], 'css_texts': self.css_texts, 'js_uris': [],
+            'main_text': main_text, 'js_texts': []}
+
+        '''
+        variable_definition = self.variable_definition
+        data_uri = b.get_data_uri(variable_definition, x)
+        url = urlparse(value.rstrip('.geojson'))
+        main_text = MAP_FELT_HTML.render({
+            'map_config': url.path,
+            'value': value})
+        js_texts = [
+            MAP_FELT_INPUT_JS_HEADER.substitute({
+                'view_name': view_name,
+            }),
+            MAP_FELT_INPUT_JS_VARIABLE.render({
+                'element_id': element_id,
+                'view_name': view_name,
+                'data_uri': data_uri
+            })
+        ]
+        return {
+            'css_uris': self.css_uris, 'css_texts': self.css_texts,
+            'js_uris': self.js_uris, 'js_texts': js_texts,
+            'main_text': main_text}
+        '''
+
+
+class MapNebulaView(VariableView):
 
     view_name = 'map-nebula'
     environment_variable_definitions = [{'id': 'MAPBOX_TOKEN'}]
@@ -155,6 +171,7 @@ class MapNebula(VariableView):
     js_uris = [NEBULA_JS_URI]
 
     def render_input(self, b: Batch, x: Element):
+        '''
         variable_definition = self.variable_definition
         variable_id = self.variable_id
         element_id = x.id
@@ -171,7 +188,8 @@ class MapNebula(VariableView):
 
         mapbox_token = environ['MAPBOX_TOKEN']
         main_text = get_map_html(
-            element_id, x.mode_name, view_name, variable_id, template=MAP_NEBULA_HTML)
+            element_id, x.mode_name, view_name, variable_id,
+            template=MAP_NEBULA_HTML)
         js_texts = [
             f"$.Nebula.accessToken = '{mapbox_token}';",
             MAP_NEBULA_LOCATION_INPUT_JS_HEADER.substitute({
@@ -179,7 +197,8 @@ class MapNebula(VariableView):
                 'view_name': view_name}),
             MAP_NEBULA_LOCATION_INPUT_JS_VARIABLE.render({
                 'element_id': element_id,
-                'map': get_map_nebula_definition(element_id, c, x.layout_settings['for_print']),
+                'map': get_map_nebula_definition(
+                    element_id, c, x.layout_settings['for_print']),
                 'style_uri': MAPBOX_STYLE_URI
             })
         ]
@@ -188,6 +207,12 @@ class MapNebula(VariableView):
             'css_uris': self.css_uris, 'css_texts': self.css_texts,
             'js_uris': self.js_uris, 'js_texts': js_texts,
             'main_text': main_text,
+        }
+        '''
+        return {
+            'css_uris': [], 'css_texts': [],
+            'js_uris': [], 'js_texts': [],
+            'main_text': '',
         }
 
 
@@ -251,7 +276,13 @@ def save_map_configuration(xy_array, source_path):
         json.dump(d, f)
 
 
-def get_map_html(element_id, mode_name, view_name, variable_id, template=MAP_MAPBOX_HTML):
+# !!!
+def get_map_html(
+        element_id,
+        mode_name,
+        view_name,
+        variable_id,
+        template=MAP_MAPBOX_HTML):
     return template.substitute({
         'element_id': element_id,
         'mode_name': mode_name,

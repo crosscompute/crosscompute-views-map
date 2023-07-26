@@ -1,0 +1,9 @@
+@layer map-felt {
+  ._map-felt {
+    display: flex;
+    flex-direction: column;
+  }
+  ._map-felt iframe {
+    display: none;
+  }
+}

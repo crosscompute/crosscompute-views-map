@@ -4,16 +4,20 @@ name: Gather GeoJSON
 version: 0.0.1
 input:
   variables:
-#   - id: felt
-#     view: map-mapbox
-#     path: felt.geojson
+    - id: felt
+      view: map-felt
+      path: felt.geojson
     - id: nebula
       view: map-nebula
       path: nebula.geojson
+      configuration:
+        longitude: -93.232727
+        latitude: 36.644180
+        zoom: 10
 output:
   templates:
     - path: output.md
 batches:
   - folder: batches/standard
 scripts:
-  - command: cp {input_folder}/* {output_folder}
+  - command: cp {input_folder}/*.geojson {output_folder}
